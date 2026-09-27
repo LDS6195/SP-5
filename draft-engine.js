@@ -206,7 +206,7 @@
         team.roster.forEach((player, playerIndex) => {
           if (usedMask & (1 << playerIndex)) return;
           const next = assign(slotIndex + 1, usedMask | (1 << playerIndex));
-          const score = (player.roleRatings[role] || 0) + next.score;
+          const score = (player.roleRatings[role] || 0) - (player.fatigue || 0) * .2 + next.score;
           if (score > best.score) best = { score, lineup: [{ player, role }, ...next.lineup] };
         });
         memo.set(key, best);

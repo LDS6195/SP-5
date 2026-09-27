@@ -382,14 +382,17 @@
       <section class="box-score-panel">
         <header class="box-score-header">
           <div><span class="menu-kicker">Performance Desk</span><h2>Player Box Score</h2></div>
-          <div class="box-tabs" role="tablist" aria-label="Team box score">
-            <button class="box-tab active" role="tab" data-box-team="home" aria-selected="true" id="homeBoxTab">Home</button>
-            <button class="box-tab" role="tab" data-box-team="away" aria-selected="false" id="awayBoxTab">Away</button>
+          <div class="box-score-controls">
+            <button class="auto-sub-toggle" id="autoSubToggle" aria-pressed="true">Auto Subs: On</button>
+            <div class="box-tabs" role="tablist" aria-label="Team box score">
+              <button class="box-tab active" role="tab" data-box-team="home" aria-selected="true" id="homeBoxTab">Home</button>
+              <button class="box-tab" role="tab" data-box-team="away" aria-selected="false" id="awayBoxTab">Away</button>
+            </div>
           </div>
         </header>
         <div class="box-table-wrap">
           <table class="box-table">
-            <thead><tr><th>Player</th><th>Role</th><th>RTG</th><th>ELIM</th><th>AST</th><th>CAP</th><th>DEF</th><th>INT</th><th>Carry</th><th>Coverage</th><th>Contribution</th></tr></thead>
+            <thead><tr><th>Player</th><th>Role</th><th>Stamina</th><th>RTG</th><th>ELIM</th><th>AST</th><th>CAP</th><th>DEF</th><th>INT</th><th>MIN</th><th>Contribution</th></tr></thead>
             <tbody id="boxScoreBody"></tbody>
           </table>
         </div>

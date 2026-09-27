@@ -91,8 +91,41 @@
     const tempo = { patient: { combat: .94, defense: 1.07, mobility: .91 }, balanced: {}, fast: { capture: 1.06, combat: 1.05, defense: .93, mobility: 1.12 } }[plan.tempo] || {};
     const focus = { control: { capture: 1.12, combat: .92 }, balanced: {}, elimination: { capture: .88, combat: 1.14 } }[plan.focus] || {};
     const risk = { conservative: { capture: .95, combat: .9, defense: 1.12 }, balanced: {}, aggressive: { capture: 1.07, combat: 1.12, defense: .88, mobility: 1.04 } }[plan.risk] || {};
-    [formation, tempo, focus, risk].forEach((source) => Object.entries(source).forEach(([key, value]) => { effects[key] *= value; }));
+    const deltas = { capture: 0, combat: 0, defense: 0, mobility: 0 };
+    [formation, tempo, focus, risk].forEach((source) => Object.entries(source).forEach(([key, value]) => { deltas[key] += value - 1; }));
+    // Stacked choices add together at a quarter strength and cap at +/-5%, so no plan is a guaranteed win.
+    Object.keys(effects).forEach((key) => { effects[key] = 1 + Math.max(-.05, Math.min(.05, deltas[key] * .25)); });
     return effects;
+  }
+
+  const formationBeats = { counter: "pressure", fortress: "overload", longRange: "fortress", pressure: "longRange", wide: "counter", escort: "wide", overload: "escort" };
+  // Ratings below 65 (usually out-of-position players) hurt, but with diminishing impact.
+  const ratingFactor = (rating) => 1 + ((rating < 65 ? 65 - (65 - rating) * .4 : rating) - 80) / 450;
+
+  function randomAwayPlan() {
+    const pick = (options) => options[Math.floor(random() * options.length)];
+    return {
+      formation: pick(["balanced", "pressure", "fortress", "longRange", "wide", "overload", "escort", "counter"]),
+      tempo: pick(["patient", "balanced", "fast"]),
+      focus: pick(["control", "balanced", "elimination"]),
+      risk: pick(["conservative", "balanced", "aggressive"])
+    };
+  }
+
+  function applyMatchupEffects() {
+    ["home", "away"].forEach((team) => {
+      const other = team === "home" ? "away" : "home";
+      const plan = state.plans[team];
+      const effects = state.effects[team];
+      if (formationBeats[plan.formation] === state.plans[other].formation) { effects.capture *= 1.05; effects.combat *= 1.05; }
+      const lean = (role) => Math.max(-.04, Math.min(.04, (teamRoleRating(team, role) - 82) / 250));
+      if (plan.tempo === "fast") effects.mobility *= 1 + lean("Runner");
+      if (plan.focus === "control") effects.capture *= 1 + lean("Runner");
+      if (plan.focus === "elimination") effects.combat *= 1 + (lean("Cannon") + lean("Bruiser")) / 2;
+      if (plan.formation === "longRange") effects.combat *= 1 + lean("Cannon");
+      if (plan.formation === "fortress" || plan.formation === "escort") effects.defense *= 1 + lean("Bruiser");
+      if (plan.formation === "counter") effects.defense *= 1 + lean("General");
+    });
   }
 
   const state = {
@@ -113,6 +146,13 @@
     players: { home: [], away: [] },
     plans: { home: { ...defaultPlan }, away: { ...awayPlan } },
     effects: { home: planEffects(defaultPlan), away: planEffects(awayPlan) },
+    form: { home: 1, away: 1 },
+    momentum: { home: 1, away: 1 },
+    momentumClock: 0,
+    bench: { home: [], away: [] },
+    autoSub: { home: true, away: true },
+    subClock: 0,
+    boxRenderAt: 0,
     thresholdEvents: new Set()
     ,finishWinner: null
     ,finishReason: null
@@ -130,6 +170,7 @@
       id: supplied ? entry.id : name.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
       name,
       primaryRole: supplied ? (entry.primaryRole || entry.role) : role,
+      flexRoles: supplied ? (entry.flexRoles || []) : [],
       role,
       attributes,
       roleRatings,
@@ -142,13 +183,91 @@
       interceptions: 0,
       contribution: role === "General" ? "100 units active" : "Awaiting impact",
       active: true,
+      stamina: Math.max(40, 100 - ((supplied && entry.fatigue) || 0)),
+      minutes: 0,
       index
       };
     });
   }
 
+  function createBench(team) {
+    return reserves[team].filter((entry) => entry && entry.roleRatings).map((entry, index) => ({
+      id: entry.id,
+      name: entry.name,
+      primaryRole: entry.primaryRole,
+      flexRoles: entry.flexRoles || [],
+      role: entry.primaryRole,
+      attributes: { ...entry.attributes },
+      roleRatings: { ...entry.roleRatings },
+      overall: entry.roleRatings[entry.primaryRole],
+      rating: 6.2 + random() * .8,
+      eliminations: 0,
+      assists: 0,
+      zoneCaptures: 0,
+      zoneDefenses: 0,
+      interceptions: 0,
+      contribution: "On the bench",
+      active: false,
+      stamina: Math.max(40, 100 - (entry.fatigue || 0)),
+      minutes: 0,
+      index: 100 + index
+    }));
+  }
+
+  const STAMINA_DRAIN = { General: .35, Visual: .45, Musical: .45, Cannon: .8, Bruiser: 1, Runner: 1.05 };
+  const staminaMultiplier = (player) => .78 + .22 * Math.max(0, player.stamina ?? 100) / 100;
+
+  function updateStamina(delta) {
+    ["home", "away"].forEach((team) => {
+      state.players[team].forEach((player) => {
+        player.stamina = Math.max(0, player.stamina - .032 * (STAMINA_DRAIN[player.role] || .9) * delta);
+        player.minutes += delta;
+      });
+      state.bench[team].forEach((player) => { player.stamina = Math.min(100, player.stamina + .02 * delta); });
+    });
+  }
+
+  let pendingSubIn = null;
+  function substitute(team, outIndex, benchIndex) {
+    const outgoing = state.players[team][outIndex];
+    const incoming = state.bench[team][benchIndex];
+    if (!outgoing || !incoming || outgoing.role === "General") return false;
+    if (team === "home") pendingSubIn = null;
+    incoming.role = outgoing.role;
+    incoming.overall = incoming.roleRatings[incoming.role];
+    incoming.active = true;
+    incoming.contribution = "Fresh off the bench";
+    outgoing.active = false;
+    outgoing.contribution = "Resting";
+    state.players[team][outIndex] = incoming;
+    state.bench[team][benchIndex] = outgoing;
+    addCommentary(formatClock(), `${teamIdentity[team].name}: ${incoming.name} checks in for ${outgoing.name}.`);
+    renderBoxScore();
+    return true;
+  }
+
+  function autoSubs(team) {
+    state.bench[team].forEach((bencher, benchIndex) => {
+      if (bencher.stamina < 70) return;
+      let best = -1;
+      let bestGain = .5;
+      state.players[team].forEach((starter, outIndex) => {
+        if (starter.role === "General" || starter.stamina > 55) return;
+        const gain = (bencher.roleRatings[starter.role] || 0) * staminaMultiplier(bencher) - starter.roleRatings[starter.role] * staminaMultiplier(starter);
+        if (gain > bestGain) { best = outIndex; bestGain = gain; }
+      });
+      if (best >= 0) substitute(team, best, benchIndex);
+    });
+  }
+
+  function manualSub(benchIndex, outIndex) {
+    if (!state.bench.home[benchIndex] || state.finished) return;
+    if (!substitute("home", outIndex, benchIndex)) { pendingSubIn = null; renderBoxScore(); }
+  }
+
   function reset() {
-    randomState = initialSeed;
+    randomState = (Math.random() * 2147483647) | 0;
+    pendingSubIn = null;
     state.running = false;
     state.finished = false;
     state.elapsed = 0;
@@ -168,8 +287,16 @@
     state.thresholdEvents.clear();
     state.players.home = createPlayers("home");
     state.players.away = createPlayers("away");
+    state.bench.home = createBench("home");
+    state.bench.away = createBench("away");
+    state.subClock = 0;
+    state.plans.away = randomAwayPlan();
     state.effects.home = planEffects(state.plans.home);
     state.effects.away = planEffects(state.plans.away);
+    applyMatchupEffects();
+    state.form = { home: 1 + (random() - .5) * .22, away: 1 + (random() - .5) * .22 };
+    state.momentum = { home: 1, away: 1 };
+    state.momentumClock = 0;
     state.zones = [
       { x: .25, y: .22, radius: .075, owner: null, capture: 0, pressure: 0 },
       { x: .75, y: .22, radius: .075, owner: null, capture: 0, pressure: 0 },
@@ -197,8 +324,8 @@
           offsetX: (random() - .5) * .09,
           offsetY: (random() - .5) * .09,
           nextDecision: 12 + random() * 22,
-          speed: (.029 + quality * .022 + random() * .008) * direction,
-          strength: (index < 9 ? 1.12 : .68) + quality * .44 + random() * .12,
+          speed: (.03 + quality * .012 + random() * .008) * direction,
+          strength: (index < 9 ? 1.12 : .68) + quality * .24 + random() * .16,
           star: index < 9,
           phase: random() * Math.PI * 2
         });
@@ -241,7 +368,7 @@
   function teamRoleRating(team, role) {
     const eligible = state.players[team].filter((player) => player.role === role);
     const players = eligible.length ? eligible : state.players[team];
-    return players.reduce((sum, player) => sum + player.roleRatings[role], 0) / players.length;
+    return players.reduce((sum, player) => sum + player.roleRatings[role] * staminaMultiplier(player), 0) / players.length;
   }
 
   function chooseTargetZone(index, plan, team) {
@@ -308,9 +435,10 @@
       const nearby = { home: 0, away: 0 };
       state.agents.forEach((agent) => {
         if (Math.hypot(agent.x - zone.x, agent.y - zone.y) < zone.radius * 1.15) {
-          const runnerQuality = teamRoleRating(agent.team, "Runner") / 85;
-          const signalQuality = (teamRoleRating(agent.team, "Visual") + teamRoleRating(agent.team, "Musical")) / 180;
-          nearby[agent.team] += agent.strength * state.effects[agent.team].capture * runnerQuality * signalQuality;
+          const runnerQuality = ratingFactor(teamRoleRating(agent.team, "Runner"));
+          const signalQuality = ratingFactor((teamRoleRating(agent.team, "Visual") + teamRoleRating(agent.team, "Musical")) / 2);
+          const opponentDefense = state.effects[agent.team === "home" ? "away" : "home"].defense;
+          nearby[agent.team] += agent.strength * state.effects[agent.team].capture * runnerQuality * signalQuality * state.form[agent.team] * state.momentum[agent.team] / Math.sqrt(opponentDefense);
         }
       });
       const difference = nearby.home - nearby.away;
@@ -346,8 +474,8 @@
     state.eventAccumulator = 0;
     const contested = state.zones.filter((zone) => Math.abs(zone.pressure) < 4 && Math.abs(zone.pressure) > .2);
     if (!contested.length || random() > .76) return;
-    const homeAttack = ((teamRoleRating("home", "Cannon") + teamRoleRating("home", "Bruiser")) / 200) * state.effects.home.combat / state.effects.away.defense;
-    const awayAttack = ((teamRoleRating("away", "Cannon") + teamRoleRating("away", "Bruiser")) / 200) * state.effects.away.combat / state.effects.home.defense;
+    const homeAttack = ratingFactor((teamRoleRating("home", "Cannon") + teamRoleRating("home", "Bruiser")) / 2) * state.form.home * state.momentum.home * state.effects.home.combat / state.effects.away.defense;
+    const awayAttack = ratingFactor((teamRoleRating("away", "Cannon") + teamRoleRating("away", "Bruiser")) / 2) * state.form.away * state.momentum.away * state.effects.away.combat / state.effects.home.defense;
     const losingTeam = random() < homeAttack / (homeAttack + awayAttack) ? "away" : "home";
     const winningTeam = losingTeam === "home" ? "away" : "home";
     const dominance = Math.max(homeAttack, awayAttack) / Math.max(.01, Math.min(homeAttack, awayAttack));
@@ -367,8 +495,8 @@
     state.scoreAccumulator += delta;
     while (state.scoreAccumulator >= controlTickSeconds) {
       state.scoreAccumulator -= controlTickSeconds;
-      state.homeScore += state.zones.filter((zone) => zone.owner === "home").length;
-      state.awayScore += state.zones.filter((zone) => zone.owner === "away").length;
+      state.homeScore = Math.min(targetScore, state.homeScore + state.zones.filter((zone) => zone.owner === "home").length);
+      state.awayScore = Math.min(targetScore, state.awayScore + state.zones.filter((zone) => zone.owner === "away").length);
     }
     const leader = state.homeScore === state.awayScore ? null : state.homeScore > state.awayScore ? "home" : "away";
     if (leader && state.lastLeader && leader !== state.lastLeader) {
@@ -423,8 +551,8 @@
       homeZoneHoldTime: state.homeScore * 10,
       awayZoneHoldTime: state.awayScore * 10,
       players: {
-        home: state.players.home.map((player) => resultPlayerLine(player)),
-        away: state.players.away.map((player) => resultPlayerLine(player))
+        home: [...state.players.home, ...state.bench.home.filter((player) => player.minutes > 0)].map((player) => resultPlayerLine(player)),
+        away: [...state.players.away, ...state.bench.away.filter((player) => player.minutes > 0)].map((player) => resultPlayerLine(player))
       }
     };
   }
@@ -441,9 +569,10 @@
       zoneCaptures: player.zoneCaptures,
       zoneDefenses: player.zoneDefenses,
       interceptions: player.interceptions,
-      distanceCarried: player.role === "Runner" ? Math.round(state.elapsed / 60 * 42 * player.overall / 90) : 0,
-      decoysSuccessful: artist ? Math.floor(state.elapsed / 280 * player.overall / 90) : 0,
-      decoysDenied: artist ? Math.floor(state.elapsed / 340 * player.overall / 90) : 0,
+      minutes: Math.round(player.minutes / 60),
+      distanceCarried: player.role === "Runner" ? Math.round(player.minutes / 60 * 42 * player.overall / 90) : 0,
+      decoysSuccessful: artist ? Math.floor(player.minutes / 280 * player.overall / 90) : 0,
+      decoysDenied: artist ? Math.floor(player.minutes / 340 * player.overall / 90) : 0,
       networkCoverage: artist ? Math.min(99, Math.round(68 + player.overall * .3)) : 0,
       survived: true,
       contribution: player.contribution
@@ -453,6 +582,19 @@
   function update(delta) {
     if (!state.running || state.finished) return;
     state.elapsed += delta;
+    state.momentumClock += delta;
+    if (state.momentumClock >= 120) {
+      state.momentumClock = 0;
+      state.momentum = { home: 1 + (random() - .5) * .34, away: 1 + (random() - .5) * .34 };
+    }
+    updateStamina(delta);
+    state.subClock += delta;
+    if (state.subClock >= 30) {
+      state.subClock = 0;
+      ["home", "away"].forEach((team) => { if (state.autoSub[team]) autoSubs(team); });
+    }
+    const now = performance.now();
+    if (now - state.boxRenderAt > 700) { state.boxRenderAt = now; renderBoxScore(); }
     updateAgents(delta);
     updateZones(delta);
     resolveCombat(delta);
@@ -577,14 +719,39 @@
 
   let selectedBoxTeam = "home";
   function renderBoxScore() {
-    document.querySelector("#boxScoreBody").innerHTML = state.players[selectedBoxTeam].map((player) => {
+    const staminaCell = (player) => `<td><span class="stamina-meter ${player.stamina < 45 ? "low" : ""}"><i style="width:${Math.round(player.stamina)}%"></i></span>${Math.round(player.stamina)}</td>`;
+    const statCells = (player, contribution) => `<td class="${player.rating >= 8 ? "rating-elite" : ""}">${player.rating.toFixed(1)}</td><td>${player.eliminations}</td><td>${player.assists}</td><td>${player.zoneCaptures}</td><td>${player.zoneDefenses}</td><td>${player.interceptions}</td><td>${Math.round(player.minutes / 60)}'</td><td>${contribution}</td>`;
+    const canSub = selectedBoxTeam === "home" && !state.finished;
+    if (state.finished) pendingSubIn = null;
+    const incoming = canSub && pendingSubIn !== null ? state.bench.home[pendingSubIn] : null;
+    const activeRows = state.players[selectedBoxTeam].map((player, outIndex) => {
       let contribution = player.contribution;
       if (player.role === "General") contribution = `${state[`${selectedBoxTeam}Units`]} units remaining`;
       if (player.role === "Visual") contribution = `${Math.round(72 + player.rating * 2)}% coverage`;
       if (player.role === "Musical") contribution = `${Math.round(77 + player.rating * 1.7)}% signal uptime`;
-      return `<tr><td><strong>${player.name}</strong></td><td>${player.role}</td><td class="${player.rating >= 8 ? "rating-elite" : ""}">${player.rating.toFixed(1)}</td><td>${player.eliminations}</td><td>${player.assists}</td><td>${player.zoneCaptures}</td><td>${player.zoneDefenses}</td><td>${player.interceptions}</td><td>${player.distanceCarried}</td><td>${player.networkCoverage}%</td><td>${contribution}</td></tr>`;
+      const target = incoming && player.role !== "General";
+      if (target) contribution = `<button class="sub-in-button sub-out-button" data-sub-out="${outIndex}">Sub Out // ${incoming.roleRatings[player.role]} as ${player.role}</button>`;
+      return `<tr class="${target ? "sub-target-row" : ""}"><td><strong>${player.name}</strong></td><td>${player.role}</td>${staminaCell(player)}${statCells(player, contribution)}</tr>`;
     }).join("");
+    const benchButton = (benchIndex) => pendingSubIn === benchIndex
+      ? `<button class="sub-in-button cancel" data-sub-cancel>Cancel</button>`
+      : `<button class="sub-in-button" data-sub-in="${benchIndex}">Sub In</button>`;
+    const benchRows = state.bench[selectedBoxTeam].map((player, benchIndex) => `<tr class="bench-row ${canSub && pendingSubIn === benchIndex ? "sub-pending" : ""}"><td><strong>${player.name}</strong></td><td>${player.primaryRole}</td>${staminaCell(player)}${statCells(player, canSub ? benchButton(benchIndex) : player.contribution)}</tr>`).join("");
+    document.querySelector("#boxScoreBody").innerHTML = activeRows + (benchRows ? `<tr class="bench-divider-row"><td colspan="11">Bench</td></tr>${benchRows}` : "");
   }
+
+  document.querySelector("#boxScoreBody").addEventListener("pointerdown", (event) => {
+    const subIn = event.target.closest("[data-sub-in]");
+    const subOut = event.target.closest("[data-sub-out]");
+    if (subIn) { pendingSubIn = Number(subIn.dataset.subIn); renderBoxScore(); }
+    else if (subOut && pendingSubIn !== null) manualSub(pendingSubIn, Number(subOut.dataset.subOut));
+    else if (event.target.closest("[data-sub-cancel]")) { pendingSubIn = null; renderBoxScore(); }
+  });
+  document.querySelector("#autoSubToggle")?.addEventListener("click", (event) => {
+    state.autoSub.home = !state.autoSub.home;
+    event.currentTarget.setAttribute("aria-pressed", String(state.autoSub.home));
+    event.currentTarget.textContent = `Auto Subs: ${state.autoSub.home ? "On" : "Off"}`;
+  });
 
   function previewPlan(plan) {
     const effects = planEffects(plan);
@@ -671,9 +838,9 @@
       addCommentary("30:00", `${teamIdentity.home.name} deploys in ${state.plans.home.formation} formation with ${state.plans.home.focus} priority.`);
     },
     getRoster(team) {
-      return state.players[team].map(({ id, name, primaryRole, role, overall, roleRatings }) => ({ id, name, primaryRole, role, overall, roleRatings }));
+      return state.players[team].map(({ id, name, primaryRole, role, overall, roleRatings, stamina, flexRoles }) => ({ id, name, primaryRole, role, overall, roleRatings, stamina, flexRoles }));
     },
-    getReserves(team) { return reserves[team].map(({ id, name, primaryRole, overall }) => ({ id, name, primaryRole, role: primaryRole, overall })); },
+    getReserves(team) { return reserves[team].map(({ id, name, primaryRole, overall, fatigue, flexRoles, roleRatings }) => ({ id, name, primaryRole, role: primaryRole, overall, roleRatings, flexRoles, stamina: Math.max(40, 100 - (fatigue || 0)) })); },
     setTeamIdentity(team, identity) {
       teamIdentity[team] = { ...teamIdentity[team], ...identity };
       document.querySelector(`#${team}TeamLogo`).src = teamIdentity[team].logo;
@@ -697,8 +864,11 @@
     quickSim(plan) {
       state.plans.home = { ...defaultPlan, ...plan };
       reset();
+      const manualPreference = state.autoSub.home;
+      state.autoSub.home = true;
       state.running = true;
       while (!state.finished) update(Math.min(2, duration - state.elapsed));
+      state.autoSub.home = manualPreference;
       draw();
       return getResult();
     }

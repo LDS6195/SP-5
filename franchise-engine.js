@@ -204,8 +204,24 @@
     return weeks;
   }
 
+  const FATIGUE_COST = { General: 1.2, Visual: 1.6, Musical: 1.6, Cannon: 2.6, Bruiser: 3.2, Runner: 3.4 };
+  const fatiguePenalty = (player) => (player.fatigue || 0) * .2;
+
+  function applyFatigue(state, game, result) {
+    ["home", "away"].forEach((side) => {
+      const team = state.teams[game[`${side}TeamId`]];
+      const played = new Map((result.players?.[side] || []).map((line) => [line.id, line]));
+      (team?.roster || []).forEach((player) => {
+        const line = played.get(player.id);
+        const share = line ? Math.min(1, (line.minutes ?? 30) / 30) : 0;
+        const change = line ? (FATIGUE_COST[line.role] || FATIGUE_COST[player.primaryRole] || 2.5) * share : -6;
+        player.fatigue = Math.round(Math.max(0, Math.min(35, (player.fatigue || 0) + change - .8)) * 10) / 10;
+      });
+    });
+  }
+
   function roleStrength(team, role, fallback) {
-    const ratings = (team.roster || []).map((player) => player.roleRatings?.[role]).filter(Number.isFinite).sort((a, b) => b - a);
+    const ratings = (team.roster || []).map((player) => player.roleRatings?.[role] - fatiguePenalty(player)).filter(Number.isFinite).sort((a, b) => b - a);
     return ratings.length ? ratings.slice(0, role === "General" || role === "Visual" || role === "Musical" ? 1 : 2).reduce((sum, value) => sum + value, 0) / Math.min(ratings.length, role === "General" || role === "Visual" || role === "Musical" ? 1 : 2) : fallback;
   }
 
@@ -222,11 +238,12 @@
 
   function playerBox(team, won, random) {
     const activeTargets = { General: 1, Cannon: 2, Runner: 2, Bruiser: 2, Visual: 1, Musical: 1 };
-    const roster = Object.entries(activeTargets).flatMap(([role, count]) => (team.roster || []).filter((player) => player.primaryRole === role).slice(0, count));
+    const freshness = (player) => player.overall + (player.form || 0) - fatiguePenalty(player);
+    const roster = Object.entries(activeTargets).flatMap(([role, count]) => (team.roster || []).filter((player) => player.primaryRole === role).sort((a, b) => freshness(b) - freshness(a)).slice(0, count));
     if (!roster.length) return [];
     return roster.map((player) => {
       const role = player.primaryRole;
-      const quality = (player.overall + (player.form || 0) - 65) / 30;
+      const quality = (freshness(player) - 65) / 30;
       const standout = random() < .06 + Math.max(0, quality) * .07 ? 1 + random() * .9 : 0;
       const rating = Math.max(4, Math.min(10, 5.4 + quality * 2.75 + (won ? .45 : -.1) + (random() - .5) * 1.6 + standout));
       const output = .55 + (rating - 5) * .18;
@@ -397,6 +414,7 @@
     game.result = result;
     game.status = "completed";
     trackGameRecords(state, game, result);
+    applyFatigue(state, game, result);
     if (game.stage === "playoff") {
       aggregatePlayers(state, game, result);
       return;
@@ -946,6 +964,7 @@
     state.season += 1;
     state.seed += 1;
     state.currentWeek = 1;
+    [...state.teams.flatMap((team) => team.roster || []), ...(state.freeAgents || [])].forEach((player) => { player.fatigue = 0; });
     state.schedule = generateSchedule(state.teams, state.season);
     state.standings = createStandings(state.teams);
     state.complete = false;

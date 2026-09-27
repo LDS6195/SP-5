@@ -858,6 +858,23 @@ body[data-theme="broadcast"] .prospect-number { font-size: 110px; }
 .box-table td { padding: 11px 14px; border-top: 1px solid #c4b498; }
 .box-table td:nth-child(3), .box-table td:nth-child(4) { font-family: var(--mono); font-weight: 700; }
 .box-table .rating-elite { color: #8f2f24; }
+.box-score-controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.auto-sub-toggle { min-height: 38px; padding: 0 14px; color: #f2e6d0; background: #203a30; border: 1px solid #52695f; font: 700 10px var(--mono); text-transform: uppercase; }
+.auto-sub-toggle[aria-pressed="false"] { color: #4a3a28; background: transparent; border-color: #9e896c; }
+.stamina-meter { display: inline-block; width: 46px; height: 6px; margin-right: 7px; vertical-align: middle; background: #c4b498; }
+.stamina-meter i { display: block; height: 100%; background: #3f7a5c; }
+.stamina-meter.low i { background: #b3452f; }
+.bench-divider-row td { padding: 7px 14px; color: #f2e6d0; background: #4a3a28; font: 700 9px var(--mono); letter-spacing: .08em; text-transform: uppercase; }
+.bench-row { background: #ede3cf; color: #5b4e3d; }
+.sub-in-button { min-height: 30px; padding: 0 12px; color: #25180f; background: #c7a45d; font: 800 10px var(--mono); text-transform: uppercase; }
+.sub-in-button.cancel { color: #f2e6d0; background: #6b5a44; }
+.sub-out-button { color: #f2e6d0; background: #8f2f24; white-space: nowrap; }
+.sub-target-row { background: #f3e2bd; }
+.bench-row.sub-pending { background: #c7a45d; color: #25180f; }
+.lineup-energy { display: block; margin-top: 2px; color: #3f7a5c; font: normal 700 9px var(--mono); text-transform: uppercase; }
+.lineup-energy.low { color: #b3452f; }
+.strategy-player.swapping { background: #c7a45d; color: #25180f; box-shadow: inset 4px 0 #8f2f24; }
+.strategy-player.swapping .lineup-energy, .strategy-player.swapping small { color: #25180f; }
 
 /* Concept 02: coach's war room */
 body[data-theme="broadcast"] {

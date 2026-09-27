@@ -17,23 +17,17 @@ const roleImages = {
 const blankPlayerSilhouette = `data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 420"><rect width="320" height="420" fill="#d8c7aa"/><circle cx="160" cy="135" r="62" fill="#7d8179"/><path d="M48 420c7-94 51-151 112-151s105 57 112 151" fill="#7d8179"/><path d="M81 420c13-68 39-105 79-105s66 37 79 105" fill="#626860" opacity=".6"/></svg>`)}`;
 const roleDisplayNames = { Visual: "Visual Signaler", Musical: "Sonic Signaler" };
 const roleShortLabels = { Visual: "V-SIG", Musical: "S-SIG" };
-const roleLineOverrides = {
-  "Leonardo da Vinci": "V-SIG / General",
-  "Serena Williams": "Runner / Cannon",
-  "Magic Johnson": "Cannon",
-  "Bo Jackson": "Runner / Bruiser"
-};
 function displayRole(role) {
   return roleDisplayNames[role] || role;
 }
 function roleLineLabel(player) {
-  if (roleLineOverrides[player?.name?.trim()]) return roleLineOverrides[player.name.trim()];
-  if (!player?.roleRatings || !player.primaryRole) return displayRole(player?.primaryRole || player?.role || "Player");
-  const secondary = Object.entries(player.roleRatings)
-    .filter(([role]) => role !== player.primaryRole && role !== "Visual" && role !== "Musical")
-    .sort((first, second) => second[1] - first[1])[0];
-  if (!secondary || secondary[1] < 90) return displayRole(player.primaryRole);
-  return player.primaryRole === "Runner" ? `Flex / ${displayRole(secondary[0])}` : `${displayRole(player.primaryRole)} / ${displayRole(secondary[0])}`;
+  const primary = player?.primaryRole || player?.role;
+  if (!primary) return "Player";
+  const flex = player.flexRoles || [];
+  const label = (role) => roleShortLabels[role] || role;
+  if (flex.length > 1) return `${label(primary)} / Flex`;
+  if (flex.length === 1) return `${label(primary)} / ${label(flex[0])}`;
+  return displayRole(primary);
 }
 function shortRole(role) {
   return roleShortLabels[role] || role.slice(0, 3).toUpperCase();
@@ -967,16 +961,17 @@ function updateStrategyRoom() {
   const activeLineup = simulator.getRoster("home");
   const reserveLineup = simulator.getReserves("home");
   const visibleRoster = [...activeLineup, ...reserveLineup];
+  const energyTag = (player) => `<i class="lineup-energy ${player.stamina < 75 ? "low" : ""}">Energy ${Math.round(player.stamina ?? 100)}%</i>`;
   document.querySelector("#strategyLineup").innerHTML = activeLineup.map((player, slotIndex) => `
-    <button class="strategy-player ${selectedLineupIds.has(player.id) ? "selected" : ""}" type="button" data-lineup-player="${player.id}" data-lineup-role="${player.role}" data-lineup-slot="${slotIndex}">
+    <button class="strategy-player ${selectedLineupIds.has(player.id) ? "selected" : ""} ${lineupSwapRole === slotIndex ? "swapping" : ""}" type="button" data-lineup-player="${player.id}" data-lineup-role="${player.role}" data-lineup-slot="${slotIndex}">
       <span>${shortRole(player.role)}</span>
-      <div><small>${roleLineLabel({ ...player, primaryRole: player.primaryRole || player.role })}</small><strong>${player.name}</strong></div>
+      <div><small>${roleLineLabel({ ...player, primaryRole: player.primaryRole || player.role })}</small><strong>${player.name}</strong>${energyTag(player)}</div>
       <b>${player.overall}</b>
     </button>
-  `).join("") + `<div class="bench-divider">Bench // select a reserve to swap</div>` + reserveLineup.map((player) => `
+  `).join("") + `<div class="bench-divider">Bench // select a starter, then a player to swap with</div>` + reserveLineup.map((player) => `
     <button class="strategy-player" type="button" data-lineup-player="${player.id}" data-lineup-role="${player.role}" data-lineup-reserve="true">
       <span>${shortRole(player.role)}</span>
-      <div><small>${roleLineLabel({ ...player, primaryRole: player.primaryRole || player.role })}</small><strong>${player.name}</strong></div>
+      <div><small>${roleLineLabel({ ...player, primaryRole: player.primaryRole || player.role })}</small><strong>${player.name}</strong>${energyTag(player)}</div>
       <b>${player.overall}</b>
     </button>
   `).join("");
@@ -1125,22 +1120,25 @@ document.querySelector("#strategyLineup").addEventListener("click", (event) => {
   const playerButton = event.target.closest("[data-lineup-player]");
   if (!playerButton) return;
   const playerId = playerButton.dataset.lineupPlayer;
-  if (playerButton.dataset.lineupReserve === "true") {
-    if (lineupSwapRole === null) { showToast("Select a starter slot to replace first"); return; }
-    selectedLineupSlots[lineupSwapRole] = playerId;
-    selectedLineupIds = new Set(selectedLineupSlots.filter(Boolean));
-    lineupSwapRole = null;
-  } else {
-    const slotIndex = Number(playerButton.dataset.lineupSlot);
-    lineupSwapRole = slotIndex;
-    selectedLineupSlots[slotIndex] = null;
-    selectedLineupIds = new Set(selectedLineupSlots.filter(Boolean));
+  const isReserve = playerButton.dataset.lineupReserve === "true";
+  getUserActiveLineup();
+  if (lineupSwapRole === null) {
+    if (isReserve) { showToast("Select a starter first, then the player to swap in"); return; }
+    lineupSwapRole = Number(playerButton.dataset.lineupSlot);
+    playerButton.classList.add("swapping");
+    showToast("Now select a starter or bench player to swap with");
+    return;
   }
-  document.querySelectorAll("[data-lineup-player]").forEach((item) => item.classList.toggle("selected", selectedLineupIds.has(item.dataset.lineupPlayer)));
-  if (selectedLineupIds.size === 9) {
-    if (activeSeasonGame !== null) configureSeasonMatchup(activeSeasonGame);
-    updateStrategyRoom();
-  } else showToast("Select a replacement to return to nine active players");
+  const fromSlot = lineupSwapRole;
+  lineupSwapRole = null;
+  if (isReserve) selectedLineupSlots[fromSlot] = playerId;
+  else {
+    const toSlot = Number(playerButton.dataset.lineupSlot);
+    [selectedLineupSlots[fromSlot], selectedLineupSlots[toSlot]] = [selectedLineupSlots[toSlot], selectedLineupSlots[fromSlot]];
+  }
+  selectedLineupIds = new Set(selectedLineupSlots.filter(Boolean));
+  if (activePlayoffGame) configurePlayoffMatch(activePlayoffGame);
+  updateStrategyRoom();
 });
 document.querySelector("#launchMatchButton").addEventListener("click", () => {
   document.querySelector("#matchCompletionActions").hidden = true;
