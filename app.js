@@ -102,7 +102,6 @@ let activeSeasonView = "schedule";
 let activeRecordView = "players";
 let activeRecordStat = "averageRating";
 let franchiseSession = null;
-let preparedSeasonRecapImage = null;
 let selectedProtectionIds = new Set();
 let renewalFilter = "All";
 let renewalSort = { key: "ovr", dir: -1 };
@@ -617,86 +616,6 @@ function renderSeasonRecap() {
   };
   document.querySelector("#seasonRecapYear").textContent = `Year ${year}`;
   document.querySelector("#seasonRecapCard").innerHTML = `<div class="recap-banner ${champion ? "champion" : ""}"><span>EWSL // Season ${state.season.toString().padStart(2, "0")}</span><strong>${champion ? "League Champions" : "Season Report"}</strong><span>Year ${year}</span></div><div class="recap-identity"><img src="${teamLogo(team.name)}" alt=""><div><span>${team.conference} Conference</span><h2>${team.name}</h2><p>${finish} // ${playoffGames.length ? `${playoffWins}-${playoffGames.length - playoffWins} in playoffs` : "Regular season"}</p></div><strong>${standing.wins}-${standing.losses}<small>Record</small></strong></div><dl class="recap-team-stats"><div><dt>Team Eliminations</dt><dd>${totals.eliminations.toLocaleString()}</dd></div><div><dt>Survival Rate</dt><dd>${games.length ? `${(totals.unitsSurvived / games.length).toFixed(1)}%` : "—"}</dd></div><div><dt>Zone Points</dt><dd>${totals.zonePoints.toLocaleString()}</dd></div></dl><div class="recap-roster-heading"><span>Full Season // Roster</span><strong>${team.roster.length} Players</strong></div><div class="recap-roster">${orderedPlayers.map(playerStats).join("")}</div><footer><span>EARTH WAR SIMULATION LEAGUE</span><strong>earthwar3k.com</strong></footer>`;
-  const caption = seasonRecapCaption();
-  const gameUrl = "https://earthwar3k.com/";
-  document.querySelector('[data-recap-platform="x"]').href = `https://twitter.com/intent/tweet?text=${encodeURIComponent(caption)}`;
-  document.querySelector('[data-recap-platform="facebook"]').href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(gameUrl)}&quote=${encodeURIComponent(caption)}`;
-  document.querySelector('[data-recap-platform="linkedin"]').href = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(gameUrl)}`;
-  document.querySelector('[data-recap-platform="sms"]').href = `sms:?body=${encodeURIComponent(caption)}`;
-  document.querySelector("#seasonRecapCaption").value = caption;
-  const imageButton = document.querySelector('[data-recap-action="download"]');
-  imageButton.textContent = "Download Image";
-  document.querySelector("#seasonRecapFeedback").textContent = "";
-  preparedSeasonRecapImage = null;
-  if (isAppleMobile()) {
-    imageButton.textContent = "Download to Files";
-    if (navigator.share) {
-      imageButton.textContent = "Preparing Photo...";
-      imageButton.disabled = true;
-      seasonRecapImage().then((file) => {
-        preparedSeasonRecapImage = file;
-        imageButton.textContent = canShareSeasonRecapImage(file) ? "Save to Photos" : "Download to Files";
-        if (!canShareSeasonRecapImage(file)) document.querySelector("#seasonRecapFeedback").textContent = "This browser cannot share this image to Photos. Download to Files is available.";
-      }).catch((error) => {
-        imageButton.textContent = "Download to Files";
-        document.querySelector("#seasonRecapFeedback").textContent = error.message;
-      }).finally(() => { imageButton.disabled = false; });
-    } else document.querySelector("#seasonRecapFeedback").textContent = "This browser cannot share images to Photos. Download to Files is available.";
-  }
-}
-
-function seasonRecapCaption() {
-  const state = franchiseSession;
-  const team = state.teams[state.userTeamId];
-  const standing = state.standings[team.id];
-  const champion = state.playoffs.championTeamId === team.id;
-  const qualified = Object.values(state.playoffs.seedsByConference || {}).flat().some((seed) => seed.teamId === team.id);
-  const games = state.playoffs.games.filter((game) => game.homeTeamId === team.id || game.awayTeamId === team.id);
-  const finish = champion ? " and won the league championship" : !qualified ? "" : games.at(-1)?.round === "League Championship" ? " and reached the league final" : " and made the playoffs";
-  return `My ${team.name} finished ${standing.wins}-${standing.losses} in EWSL Year ${2999 + state.season}${finish}. Think you can top it? Play at https://earthwar3k.com/`;
-}
-
-function isAppleMobile() {
-  return /iPhone|iPad|iPod/.test(navigator.userAgent) || navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1;
-}
-
-function canShareSeasonRecapImage(file = new File(["report"], "report.png", { type: "image/png" })) {
-  return Boolean(navigator.share && navigator.canShare?.({ files: [file] }));
-}
-
-async function seasonRecapImage() {
-  if (!window.htmlToImage) throw new Error("Image export is unavailable. Screenshot the report instead.");
-  const card = document.querySelector("#seasonRecapCard");
-  await document.fonts.ready;
-  const blob = await window.htmlToImage.toBlob(card, { pixelRatio: 2, backgroundColor: "#f2e8d4", cacheBust: true, imagePlaceholder: blankPlayerSilhouette });
-  if (!blob) throw new Error("The report image could not be created. Screenshot the card instead.");
-  return new File([blob], `earthwar3k-${teamSlug(userDraftTeam.name)}-${2999 + franchiseSession.season}.png`, { type: "image/png" });
-}
-
-function downloadSeasonRecap(file) {
-  const url = URL.createObjectURL(file);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = file.name;
-  document.body.append(link);
-  link.click();
-  link.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
-}
-
-async function copySeasonRecapCaption() {
-  const caption = seasonRecapCaption();
-  try {
-    await navigator.clipboard.writeText(caption);
-  } catch {
-    const field = document.createElement("textarea");
-    field.value = caption;
-    document.body.append(field);
-    field.select();
-    const copied = document.execCommand("copy");
-    field.remove();
-    if (!copied) throw new Error("Could not copy the caption.");
-  }
 }
 
 function renderProgression() {
@@ -1542,55 +1461,6 @@ document.querySelector("#championshipModal").addEventListener("click", (event) =
 document.querySelector("#offseasonBackButton").addEventListener("click", () => showGameScreen(playoffsScreen));
 document.querySelector("#awardsBackButton").addEventListener("click", () => showGameScreen(seasonScreen));
 document.querySelector("#seasonRecapBackButton").addEventListener("click", () => showGameScreen(awardsScreen));
-document.querySelector("#seasonRecapScreen").addEventListener("click", async (event) => {
-  const platform = event.target.closest("[data-recap-platform]")?.dataset.recapPlatform;
-  if (platform === "facebook" || platform === "linkedin") {
-    const feedback = document.querySelector("#seasonRecapFeedback");
-    feedback.textContent = "Preparing caption and report image...";
-    Promise.allSettled([copySeasonRecapCaption(), seasonRecapImage().then(downloadSeasonRecap)]).then(([caption, image]) => {
-      feedback.textContent = caption.status === "fulfilled" && image.status === "fulfilled" ? "Caption copied and image downloaded. Paste both into your post." : caption.status === "fulfilled" ? "Caption copied. Use Download Image to attach the report." : image.status === "fulfilled" ? "Image downloaded. Copy the caption above for your post." : "Copy the caption and screenshot the report for your post.";
-    });
-    return;
-  }
-  if (platform === "x") { document.querySelector("#seasonRecapFeedback").textContent = "X draft opened. Attach your report image to the post."; return; }
-  if (platform === "sms") return;
-  const button = event.target.closest("[data-recap-action]");
-  if (!button || button.disabled) return;
-  const action = button.dataset.recapAction;
-  if (action === "continue") { advanceOffseason(); return; }
-  const feedback = document.querySelector("#seasonRecapFeedback");
-  button.disabled = true;
-  try {
-    if (action === "caption") {
-      await copySeasonRecapCaption();
-      feedback.textContent = "Season caption copied.";
-      return;
-    }
-    if (action === "download" && isAppleMobile() && preparedSeasonRecapImage && canShareSeasonRecapImage(preparedSeasonRecapImage)) {
-      await navigator.share({ files: [preparedSeasonRecapImage] });
-      feedback.textContent = "Choose Save Image in the iOS share sheet.";
-      return;
-    }
-    const nativeImageShare = action === "instagram" && canShareSeasonRecapImage();
-    if (action === "instagram" && !nativeImageShare) window.open("https://www.instagram.com/", "_blank", "noopener,noreferrer");
-    feedback.textContent = "Preparing report image...";
-    const file = preparedSeasonRecapImage || await seasonRecapImage();
-    if (nativeImageShare) {
-      await navigator.share({ title: `${userDraftTeam.name} // Year ${2999 + franchiseSession.season}`, text: seasonRecapCaption(), files: [file] });
-      feedback.textContent = "Report shared.";
-    } else {
-      downloadSeasonRecap(file);
-      if (action === "instagram") {
-        try {
-          await copySeasonRecapCaption();
-          feedback.textContent = "Image downloaded and caption copied for Instagram.";
-        } catch { feedback.textContent = "Image downloaded. Add earthwar3k.com to your post."; }
-      } else feedback.textContent = isAppleMobile() ? "Image downloaded to Files. This browser cannot send it to Photos." : "Report image downloaded.";
-    }
-  } catch (error) {
-    feedback.textContent = error.name === "AbortError" ? "Share cancelled." : error.message || "Could not export the report.";
-  } finally { button.disabled = false; }
-});
 document.querySelector("#progressionBackButton").addEventListener("click", () => showGameScreen(awardsScreen));
 document.querySelector("#progressionCommand").addEventListener("click", (event) => {
   if (!event.target.closest("[data-progression-action='continue']")) return;
@@ -1713,49 +1583,9 @@ document.querySelector("#manualSaveButton").addEventListener("click", async () =
 document.querySelector("#exportAllButton").addEventListener("click", async () => {
   try { await window.ProxySaves.exportAll(); } catch (error) { showToast(error.message); }
 });
-document.querySelector("#saveList").addEventListener("click", async (event) => {
-  const action = event.target.closest("[data-save-action]");
-  if (!action) return;
-  const id = action.dataset.saveId;
-  try {
-    if (action.dataset.saveAction === "load") await restoreGame(await window.ProxySaves.load(id));
-    if (action.dataset.saveAction === "export") await window.ProxySaves.exportSave(id);
-    if (action.dataset.saveAction === "delete") { await window.ProxySaves.remove(id); await renderSaveList(); await refreshContinueButton(); }
-  } catch (error) { showToast(error.message); }
+document.querySelector("#seasonRecapScreen").addEventListener("click", (event) => {
+  if (event.target.closest("[data-recap-action='continue']")) advanceOffseason();
 });
-
-function renderRoster() {
-  document.querySelector("#draftTeamLogo").src = teamLogo(userDraftTeam.name);
-  document.querySelector("#draftTeamLogo").alt = `${userDraftTeam.name} logo`;
-  document.querySelector("#draftTeamName").textContent = userDraftTeam.name;
-  const remaining = userDraftTeam.roster.slice();
-  const takeRole = (role) => {
-    const index = remaining.findIndex((player) => player.primaryRole === role);
-    return index < 0 ? null : remaining.splice(index, 1)[0];
-  };
-  const rows = [...starterSlots.map((role) => ({ role, label: "Starter", member: takeRole(role) })), ...benchSlots.map((role) => ({ role, label: "Bench", member: takeRole(role) }))];
-  rosterList.innerHTML = rows.map(({ role, label, member }) => {
-    const player = member;
-    return `
-    <div class="roster-slot ${player ? "filled" : "open"}">
-      ${player
-        ? `<img class="roster-avatar" src="${playerImage(player)}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer">`
-        : `<span class="roster-avatar empty">+</span>`}
-      <span><small>${label === "Bench" ? label : `${label} // ${role}`}</small><strong>${player?.name || "Open Position"}</strong></span>
-      <span class="roster-rating">${player?.overall ?? "--"}</span>
-    </div>
-  `;
-  }).join("");
-  document.querySelector("#rosterCapacity").textContent = `${userDraftTeam.roster.length} / 12`;
-  const roleCoverage = new Set(userDraftTeam.roster.map((player) => player.primaryRole)).size;
-  const chemistry = Math.min(99, 42 + Math.round(userDraftTeam.roster.length / 12 * 34) + Math.round(roleCoverage / 6 * 24));
-  const chemistryDial = document.querySelector(".chemistry-dial");
-  chemistryDial.style.setProperty("--score", chemistry);
-  chemistryDial.querySelector("strong").textContent = chemistry;
-  document.querySelector(".chemistry-summary > div:last-child > strong").textContent = chemistry >= 82 ? "Connected Vanguard" : chemistry >= 65 ? "Forming Vanguard" : "Unformed Squad";
-  document.querySelector(".chemistry-summary > div:last-child > p").textContent = `${roleCoverage}/6 role families online // improves as the roster fills`;
-}
-
 function ratingForDraftView(player) {
   return player.roleRatings[player.primaryRole] ?? player.overall;
 }

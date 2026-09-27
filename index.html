@@ -218,25 +218,11 @@
       <span id="seasonRecapYear"></span>
     </header>
     <main class="season-recap-layout">
-      <article class="season-recap-card" id="seasonRecapCard" aria-label="Shareable season report"></article>
-      <div class="season-recap-share">
-        <span>Share This Season</span>
-        <label class="season-recap-caption" for="seasonRecapCaption">Post Caption</label>
-        <textarea id="seasonRecapCaption" rows="3" readonly aria-label="Season report post caption"></textarea>
-        <nav aria-label="Share season report">
-          <a data-recap-platform="x" href="https://twitter.com/intent/tweet" target="_blank" rel="noopener noreferrer" aria-label="Post to X" title="Post to X"><b aria-hidden="true">X</b><small>X</small></a>
-          <a data-recap-platform="facebook" href="https://www.facebook.com/sharer/sharer.php" target="_blank" rel="noopener noreferrer" aria-label="Share on Facebook" title="Share on Facebook"><b aria-hidden="true">f</b><small>Facebook</small></a>
-          <a data-recap-platform="linkedin" href="https://www.linkedin.com/sharing/share-offsite/" target="_blank" rel="noopener noreferrer" aria-label="Share on LinkedIn" title="Share on LinkedIn"><b aria-hidden="true">in</b><small>LinkedIn</small></a>
-          <a data-recap-platform="sms" href="sms:?body=https%3A%2F%2Fearthwar3k.com%2F" aria-label="Share by text message" title="Share by text message"><b aria-hidden="true">SMS</b><small>Text</small></a>
-          <button type="button" data-recap-action="instagram" aria-label="Share image to Instagram or other apps" title="Share image to Instagram or other apps"><b aria-hidden="true">IG</b><small>Instagram</small></button>
-        </nav>
-      </div>
+      <article class="season-recap-card" id="seasonRecapCard" aria-label="Season report"></article>
       <div class="season-recap-actions">
-        <button type="button" data-recap-action="download">Download Image</button>
-        <button type="button" data-recap-action="caption">Copy Caption</button>
         <button type="button" data-recap-action="continue">Continue to Offseason <span>→</span></button>
       </div>
-      <p class="season-recap-feedback" id="seasonRecapFeedback" role="status" aria-live="polite"></p>
+      <p class="season-recap-invite">Screenshot your season report. Invite friends to beat your record at earthwar3k.com.</p>
     </main>
   </section>
 
@@ -683,7 +669,6 @@
   <script src="draft-engine.js"></script>
   <script src="franchise-engine.js"></script>
   <script src="save-manager.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.13/dist/html-to-image.js"></script>
   <script src="app.js"></script>
   <script src="match-sim.js"></script>
   <!-- Cloudflare Web Analytics -->
