@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">Louisville Thoroughbreds logo</title>
+  <desc id="desc">A heritage racing seal with a forward horse profile and an angular letter L.</desc>
+  <circle cx="256" cy="256" r="224" fill="#17352d"/>
+  <circle cx="256" cy="256" r="196" fill="#eadfc7" stroke="#c89f50" stroke-width="11"/>
+  <path fill="#17352d" d="M139 339V164h55v128h104v47z"/>
+  <path fill="#9c3527" d="M206 276c24-14 43-34 57-60l-21-30 46-48 61 19 33 52-25-4 9 37-34-19-15 39-29-28c-17 36-41 65-72 84z"/>
+  <path fill="#c89f50" d="m295 158 13-46 23 36 43-13-23 37 30 34-46-6-17 43-10-45-46-1z"/>
+  <circle cx="335" cy="180" r="6" fill="#eadfc7"/>
+  <path fill="none" stroke="#c89f50" stroke-width="8" stroke-dasharray="4 14" stroke-linecap="round" d="M98 387c91 67 225 67 316 0"/>
+</svg>

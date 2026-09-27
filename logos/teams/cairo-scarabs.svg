@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">Cairo Scarabs logo</title>
+  <desc id="desc">A lapis scarab carrying a solar disc over desert geometry.</desc>
+  <path fill="#153f70" d="m256 24 222 232-222 232L34 256z"/><path fill="none" stroke="#dfb64c" stroke-width="15" d="m256 55 190 201-190 201L66 256z"/><circle cx="256" cy="143" r="57" fill="#dfb64c"/><ellipse cx="256" cy="286" rx="62" ry="108" fill="#e8d5a7"/><path fill="#153f70" d="M256 178v216M194 249h124"/><path fill="none" stroke="#dfb64c" stroke-width="18" stroke-linecap="round" d="M201 233 130 185m71 102-87 4m87 49-70 55m180-162 71-48m-71 102 87 4m-87 49 70 55"/><text x="256" y="310" text-anchor="middle" fill="#dfb64c" stroke="#153f70" stroke-width="7" paint-order="stroke fill" font-family="Georgia,serif" font-size="49" font-weight="700">CS</text>
+</svg>

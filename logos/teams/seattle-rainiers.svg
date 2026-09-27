@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">Seattle Rainiers logo</title>
+  <desc id="desc">Mount Rainier rising through a cadence of rain.</desc>
+  <path fill="#173c34" d="M62 462V226C62 91 143 28 256 28s194 63 194 198v236z"/><path fill="none" stroke="#d9eef2" stroke-width="15" d="M90 434V230c0-110 64-174 166-174s166 64 166 174v204z"/><path fill="#d9eef2" d="m91 355 165-238 165 238z"/><path fill="#e1a442" d="m205 190 51-73 50 72-30-12-20 29-21-29z"/><path fill="none" stroke="#173c34" stroke-width="29" d="M224 231h71c52 0 52 73 0 73h-71v81m56-81 52 81"/><path stroke="#e1a442" stroke-width="10" stroke-linecap="round" d="M126 112v43m53-73v46m156-46v46m53-16v43"/>
+</svg>

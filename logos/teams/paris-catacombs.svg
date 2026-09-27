@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">Paris Catacombs logo</title>
+  <desc id="desc">A stacked ossuary arch beneath a Parisian keystone.</desc>
+  <path fill="#24203d" d="M62 462V226C62 91 143 28 256 28s194 63 194 198v236z"/><path fill="none" stroke="#e8dfc8" stroke-width="15" d="M90 434V230c0-110 64-174 166-174s166 64 166 174v204z"/><path fill="none" stroke="#e8dfc8" stroke-width="25" d="M144 371V243c0-69 50-112 112-112s112 43 112 112v128"/><circle cx="216" cy="252" r="22" fill="#c24446"/><circle cx="296" cy="252" r="22" fill="#c24446"/><path fill="#e8dfc8" d="m256 266 18 35h-36zM198 324h116v55H198z"/><path fill="#24203d" stroke="#c24446" stroke-width="7" d="M191 318h130v67H191z"/><text x="256" y="367" text-anchor="middle" fill="#e8dfc8" font-family="Courier New,monospace" font-size="50" font-weight="700">PC</text>
+</svg>

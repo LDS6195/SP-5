@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">Los Angeles Stars logo</title>
+  <desc id="desc">A cinematic eight-point star over a westward horizon.</desc>
+  <path fill="#241735" d="m256 24 222 232-222 232L34 256z"/><path fill="none" stroke="#f05a8a" stroke-width="15" d="m256 55 190 201-190 201L66 256z"/><text x="256" y="322" text-anchor="middle" transform="rotate(-12 256 256)" fill="none" stroke="#f05a8a" stroke-width="13" opacity=".55" font-family="Impact,Arial Black,sans-serif" font-size="178">LA</text><path fill="#ffd34f" d="m256 102 25 92 79-54-54 79 92 25-92 25 54 79-79-54-25 92-25-92-79 54 54-79-92-25 92-25-54-79 79 54z"/><circle cx="256" cy="244" r="48" fill="#f05a8a"/><path stroke="#ffd34f" stroke-width="12" d="M122 382h268"/>
+</svg>

@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">New Orleans Voodoo logo</title>
+  <desc id="desc">A ceremonial mask with crescent eyes and protective stitch marks.</desc>
+  <path fill="#32184b" d="M78 52h356v244c0 92-74 142-178 174C152 438 78 388 78 296z"/><path fill="none" stroke="#e0b94f" stroke-width="14" d="M101 78h310v212c0 72-55 113-155 146-100-33-155-74-155-146z"/><path fill="#e0b94f" d="m151 142 105-54 105 54-22 181-83 94-83-94z"/><path fill="#32184b" d="M183 199h61v62h-61zm85 0h61v62h-61z"/><text x="213" y="247" text-anchor="middle" fill="#2bb673" font-family="Georgia,serif" font-size="50" font-weight="700">N</text><text x="299" y="247" text-anchor="middle" fill="#2bb673" font-family="Georgia,serif" font-size="47" font-weight="700">O</text><path stroke="#2bb673" stroke-width="12" d="M256 269v95m-42-48h84M169 143l-34-39m208 39 34-39"/>
+</svg>

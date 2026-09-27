@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">Berlin Union logo</title>
+  <desc id="desc">Interlocking industrial rings crossed by a single unifying bar.</desc>
+  <path fill="#f1eee3" d="M128 38h256l108 218-108 218H128L20 256z"/><path fill="none" stroke="#d83b32" stroke-width="14" d="M145 66h222l93 190-93 190H145L52 256z"/><circle cx="205" cy="256" r="89" fill="none" stroke="#161616" stroke-width="35"/><circle cx="307" cy="256" r="89" fill="none" stroke="#d83b32" stroke-width="35"/><path stroke="#161616" stroke-width="24" d="M112 256h288"/>
+</svg>

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 420" role="img" aria-labelledby="title desc">
+  <title id="title">Austin Outlaws logo</title>
+  <desc id="desc">An angular letter A crossed by an orbital route and lone navigation star.</desc>
+  <path fill="#1d2927" d="M37 210 128 55h384l91 155-91 155H128z"/>
+  <path fill="none" stroke="#cf5536" stroke-width="13" d="M58 210 140 77h360l82 133-82 133H140z"/>
+  <path fill="#eee0c6" d="m207 312 95-224h38l95 224h-61l-18-49h-71l-18 49zm95-96h37l-19-58z"/>
+  <path fill="none" stroke="#58b9a1" stroke-width="11" stroke-linecap="round" d="M87 245c93-71 184-93 275-64 68 22 119 12 172-38"/>
+  <path fill="#cf5536" d="m515 101 10 23 25 2-19 17 6 25-22-13-22 13 6-25-19-17 25-2z"/>
+  <circle cx="171" cy="207" r="11" fill="#58b9a1"/>
+  <circle cx="451" cy="177" r="8" fill="#58b9a1"/>
+</svg>

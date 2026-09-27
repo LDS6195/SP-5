@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">London Crown logo</title>
+  <desc id="desc">A severe crown rising above the Thames tide marks.</desc>
+  <path fill="#17191f" d="M78 52h356v244c0 92-74 142-178 174C152 438 78 388 78 296z"/><path fill="none" stroke="#d6b55f" stroke-width="14" d="M101 78h310v212c0 72-55 113-155 146-100-33-155-74-155-146z"/><path fill="#d6b55f" d="m122 160 62 42 72-111 72 111 62-42-31 141H153z"/><path fill="#a72f3d" d="M156 316h200v45H156z"/><text x="256" y="230" text-anchor="middle" fill="#17191f" font-family="Georgia,serif" font-size="44" font-weight="700">LC</text><circle cx="184" cy="158" r="9" fill="#a72f3d"/><circle cx="256" cy="103" r="9" fill="#a72f3d"/><circle cx="328" cy="158" r="9" fill="#a72f3d"/><path fill="none" stroke="#d6b55f" stroke-width="11" d="M118 395c56-30 102-30 138 0 36-30 82-30 138 0"/>
+</svg>

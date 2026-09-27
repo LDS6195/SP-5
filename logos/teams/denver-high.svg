@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">Denver High logo</title>
+  <desc id="desc">Twin fourteeners under an ascending altitude chevron.</desc>
+  <path fill="#193f72" d="m256 24 222 232-222 232L34 256z"/><path fill="none" stroke="#f5f3eb" stroke-width="15" d="m256 55 190 201-190 201L66 256z"/><path fill="#f5f3eb" d="M116 362 231 157h101l64 112-64 93z"/><path fill="#193f72" d="M174 333V198h69c102 0 102 135 0 135zm48-41h21c43 0 43-53 0-53h-21z"/><path fill="none" stroke="#f47738" stroke-width="20" d="M288 192v141m0-68h62"/><text x="230" y="355" text-anchor="middle" fill="#193f72" font-family="Courier New,monospace" font-size="27" font-weight="700">5280</text>
+</svg>

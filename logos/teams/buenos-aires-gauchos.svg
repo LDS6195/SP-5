@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">Buenos Aires Gauchos logo</title>
+  <desc id="desc">A gaucho hat and looping lariat over river blue.</desc>
+  <path fill="#183b62" d="M42 82h428l-60 174 60 174H42l52-174z"/><path fill="none" stroke="#d5eef4" stroke-width="14" d="M73 109h359l-49 147 49 147H73l48-147z"/><path fill="#d5eef4" d="M105 263c80-30 222-30 302 0l-57 55H162z"/><path fill="#c87539" d="m168 249 45-121h86l45 121z"/><path fill="#183b62" d="M177 231h158v39H177z"/><text x="256" y="261" text-anchor="middle" fill="#d5eef4" font-family="Georgia,serif" font-size="34" font-style="italic" font-weight="700">BA</text><path fill="none" stroke="#c87539" stroke-width="13" d="M146 344c39 75 187 72 221-6 13-30-15-55-43-40-31 16-30 65 8 83"/>
+</svg>

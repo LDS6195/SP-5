@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">Vancouver Voyageurs logo</title>
+  <desc id="desc">A coastal canoe crossing a compass rose.</desc>
+  <circle cx="256" cy="256" r="222" fill="#0f4f55"/><circle cx="256" cy="256" r="188" fill="none" stroke="#f0e3c5" stroke-width="18"/><circle cx="256" cy="256" r="151" fill="#0f4f55" stroke="#d6673e" stroke-width="5"/><path fill="#f0e3c5" opacity=".2" d="M122 101h72l62 229 62-229h72L292 412h-72z"/><path fill="#d6673e" d="m256 102 18 119 104 35-104 35-18 119-18-119-104-35 104-35z"/><path fill="#f0e3c5" d="M112 279c79 34 209 34 288 0-21 63-267 63-288 0z"/><path stroke="#0f4f55" stroke-width="11" d="M178 272 256 184l78 88"/>
+</svg>

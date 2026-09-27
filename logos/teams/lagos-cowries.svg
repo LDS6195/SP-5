@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">Lagos Cowries logo</title>
+  <desc id="desc">A cowrie shell split by lagoon currents and market lines.</desc>
+  <path fill="#086b68" d="M128 38h256l108 218-108 218H128L20 256z"/><path fill="none" stroke="#f3e6c9" stroke-width="14" d="M145 66h222l93 190-93 190H145L52 256z"/><path fill="#f3e6c9" d="M111 263c0-108 65-180 145-180s145 72 145 180-65 166-145 166-145-58-145-166z"/><path fill="#086b68" d="M242 116c52 52 64 222 12 276-51-54-63-224-12-276z"/><path fill="none" stroke="#ef704b" stroke-width="22" stroke-linejoin="round" d="M185 195v115h66m102-75a72 72 0 1 0 0 93"/><circle cx="190" cy="195" r="12" fill="#ef704b"/>
+</svg>

@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">Moscow Cosmonauts logo</title>
+  <desc id="desc">A cosmonaut visor crossed by a polar orbital track.</desc>
+  <path fill="#14264b" d="M62 462V226C62 91 143 28 256 28s194 63 194 198v236z"/><path fill="none" stroke="#cbd3dc" stroke-width="15" d="M90 434V230c0-110 64-174 166-174s166 64 166 174v204z"/><circle cx="256" cy="252" r="150" fill="#cbd3dc"/><path fill="#14264b" d="M134 232c28-102 216-102 244 0l-25 91H159z"/><path fill="none" stroke="#d53b42" stroke-width="19" stroke-linejoin="bevel" d="M181 294V205l75 67 75-67v89"/><path fill="#d53b42" d="m256 77 13 31 33 3-25 22 8 33-29-17-29 17 8-33-25-22 33-3z"/><path fill="none" stroke="#d53b42" stroke-width="11" d="M91 313c87-75 245-105 339-22"/><circle cx="405" cy="280" r="14" fill="#d53b42"/><path fill="#14264b" d="M174 343h164v46H174z"/>
+</svg>

@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Proxy League // Logo Concepts</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,600;0,800;1,700&amp;family=Manrope:wght@500;600;700&amp;display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; color: #eee2cd; background-color: #26170f; background-image: repeating-linear-gradient(92deg, transparent 0 42px, rgba(255,255,255,.025) 44px, rgba(0,0,0,.12) 47px, transparent 52px); font-family: "Manrope", sans-serif; }
+    header { max-width: 1400px; margin: auto; padding: 52px clamp(20px, 5vw, 72px) 30px; border-bottom: 1px solid #76543d; }
+    header span { color: #c7a45d; font-size: 11px; text-transform: uppercase; }
+    h1 { margin: 8px 0; font: italic 800 clamp(44px, 7vw, 82px)/.9 "Barlow Condensed", sans-serif; text-transform: uppercase; }
+    header p { max-width: 650px; color: #d0c0a6; line-height: 1.6; }
+    main { max-width: 1400px; margin: auto; display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; padding: 0 clamp(20px, 5vw, 72px) 70px; background: #76543d; }
+    article { min-width: 0; padding: 32px; background: #e8dcc5; color: #2a2017; }
+    article:nth-child(2) { background: #203a30; color: #f1e5cf; }
+    .logo-stage { aspect-ratio: 1; display: grid; place-items: center; padding: 12%; background-image: radial-gradient(circle, rgba(255,255,255,.08), transparent 62%); }
+    img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 12px 10px rgba(0,0,0,.2)); }
+    h2 { margin: 22px 0 3px; font: italic 800 30px "Barlow Condensed", sans-serif; text-transform: uppercase; }
+    article span { color: #8f2f24; font-size: 10px; text-transform: uppercase; }
+    article:nth-child(2) span { color: #dfbd71; }
+    p { color: inherit; font-size: 12px; line-height: 1.6; opacity: .78; }
+    .swatches { display: flex; gap: 6px; margin-top: 20px; }
+    .swatches i { width: 28px; height: 9px; display: block; }
+    @media (max-width: 800px) { main { grid-template-columns: 1fr; padding-inline: 12px; } article { padding: 24px; } .logo-stage { max-height: 360px; } }
+  </style>
+</head>
+<body>
+  <header>
+    <span>League Identity Study // 01</span>
+    <h1>Three Cities.<br>Three Systems.</h1>
+    <p>Initial vector marks exploring institutional command, racing heritage, and frontier futurism. Each remains legible as a small scoreboard icon and a large field insignia.</p>
+  </header>
+  <main>
+    <article>
+      <div class="logo-stage"><img src="logos/chicago-directorate.svg" alt="Chicago Directorate logo"></div>
+      <span>Institutional Crest</span><h2>Chicago Directorate</h2>
+      <p>A rigid command grid wrapped around a contested center. Severe, civic, and built for a franchise that values systems over spectacle.</p>
+      <div class="swatches"><i style="background:#172c25"></i><i style="background:#c7a45d"></i><i style="background:#a63827"></i></div>
+    </article>
+    <article>
+      <div class="logo-stage"><img src="logos/louisville-thoroughbreds.svg" alt="Louisville Thoroughbreds logo"></div>
+      <span>Heritage Seal</span><h2>Louisville Thoroughbreds</h2>
+      <p>A racing-club seal with an architectural L and forward horse profile. Traditional at first glance, engineered underneath.</p>
+      <div class="swatches"><i style="background:#17352d"></i><i style="background:#eadfc7"></i><i style="background:#c89f50"></i></div>
+    </article>
+    <article>
+      <div class="logo-stage"><img src="logos/austin-outriders.svg" alt="Austin Outriders logo"></div>
+      <span>Route Badge</span><h2>Austin Outriders</h2>
+      <p>An open-road A crossed by a live tactical route. Fast, independent, and deliberately separate from familiar longhorn imagery.</p>
+      <div class="swatches"><i style="background:#1d2927"></i><i style="background:#cf5536"></i><i style="background:#58b9a1"></i></div>
+    </article>
+  </main>
+</body>
+</html>

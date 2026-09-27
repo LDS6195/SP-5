@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">Chicago Wind logo</title>
+  <desc id="desc">A geometric civic crest forming the letter C around a central wind star.</desc>
+  <path fill="#172c25" d="M256 22 450 134v244L256 490 62 378V134z"/>
+  <path fill="none" stroke="#c7a45d" stroke-width="16" d="M256 48 428 147v218L256 464 84 365V147z"/>
+  <path fill="#efe2c8" d="M352 143c-25-25-57-38-96-38-84 0-148 65-148 151s64 151 148 151c39 0 71-13 96-38l-42-55c-14 15-31 22-52 22-43 0-74-34-74-80s31-80 74-80c21 0 38 7 52 22z"/>
+  <path fill="#a63827" d="m256 187 18 38 42 5-31 29 8 42-37-21-37 21 8-42-31-29 42-5z"/>
+  <path stroke="#c7a45d" stroke-width="8" d="M256 65v78M256 369v78M101 256h67M344 256h67"/>
+  <circle cx="256" cy="256" r="13" fill="#c7a45d"/>
+</svg>

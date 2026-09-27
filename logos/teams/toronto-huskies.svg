@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">Toronto Huskies logo</title>
+  <desc id="desc">A split-tone husky mask built from ice facets.</desc>
+  <path fill="#132934" d="M128 38h256l108 218-108 218H128L20 256z"/><path fill="none" stroke="#83c8e5" stroke-width="14" d="M145 66h222l93 190-93 190H145L52 256z"/><path fill="#f6f4eb" d="m142 145 75 36 39-57 39 57 75-36-29 151-85 91-85-91z"/><path fill="#83c8e5" d="m171 184 60 27-36 71-24-19zm170 0-60 27 36 71 24-19z"/><path fill="#132934" d="m221 309 35 29 35-29-35 74z"/><path fill="#132934" d="M220 162h72v30h-21v77h-30v-77h-21z"/>
+</svg>

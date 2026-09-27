@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">Costa Rica Ticos logo</title>
+  <desc id="desc">A bright tree frog poised inside a rainforest ring.</desc>
+  <circle cx="256" cy="256" r="222" fill="#0b5b48"/><circle cx="256" cy="256" r="188" fill="none" stroke="#f4d43f" stroke-width="18"/><circle cx="256" cy="256" r="151" fill="#0b5b48" stroke="#e84b3c" stroke-width="5"/><ellipse cx="256" cy="258" rx="79" ry="105" fill="#f4d43f"/><circle cx="212" cy="190" r="34" fill="#e84b3c"/><circle cx="300" cy="190" r="34" fill="#e84b3c"/><circle cx="212" cy="190" r="12" fill="#0b5b48"/><circle cx="300" cy="190" r="12" fill="#0b5b48"/><path fill="none" stroke="#e84b3c" stroke-width="19" stroke-linecap="round" d="M194 306 137 365m181-59 57 59M203 255l-65-30m171 30 65-30"/><ellipse cx="256" cy="285" rx="54" ry="39" fill="#0b5b48"/><text x="256" y="302" text-anchor="middle" fill="#f4d43f" font-family="Trebuchet MS,Arial,sans-serif" font-size="45" font-weight="700">CR</text>
+</svg>

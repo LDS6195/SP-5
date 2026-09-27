@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">Miami Vice logo</title>
+  <desc id="desc">A neon causeway crossing a low tropical sun.</desc>
+  <path fill="#09283e" d="M26 120 92 54h328l66 66-40 136 40 136-66 66H92l-66-66 40-136z"/><path fill="none" stroke="#38d8d0" stroke-width="14" d="M62 132 105 88h302l43 44-35 124 35 124-43 44H105l-43-44 35-124z"/><circle cx="256" cy="203" r="91" fill="#ff5f9e"/><path fill="none" stroke="#38d8d0" stroke-width="22" stroke-linecap="square" stroke-linejoin="miter" d="M116 311V170l62 77 61-77v141M268 170l58 141 70-141"/><path stroke="#09283e" stroke-width="18" d="M91 225h330"/><path fill="none" stroke="#38d8d0" stroke-width="13" d="M113 367c58-42 105-42 143 0 38-42 85-42 143 0"/>
+</svg>

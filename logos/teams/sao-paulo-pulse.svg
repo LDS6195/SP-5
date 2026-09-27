@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">Sao Paulo Pulse logo</title>
+  <desc id="desc">A metropolitan pulse line becoming a tropical leaf.</desc>
+  <path fill="#26203d" d="M26 120 92 54h328l66 66-40 136 40 136-66 66H92l-66-66 40-136z"/><path fill="none" stroke="#b7ef45" stroke-width="14" d="M62 132 105 88h302l43 44-35 124 35 124-43 44H105l-43-44 35-124z"/><path fill="none" stroke="#b7ef45" stroke-width="25" stroke-linecap="round" d="M137 173c33-42 119-38 119 15 0 64-121 42-121 106 0 54 91 62 128 17"/><path fill="none" stroke="#ff6b4a" stroke-width="25" stroke-linecap="square" d="M286 344V158h71c68 0 68 99 0 99h-71"/><path fill="#b7ef45" d="M356 118c71 22 83 68 39 111-51-5-76-44-39-111z"/>
+</svg>

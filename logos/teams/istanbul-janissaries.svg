@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">Istanbul Janissaries logo</title>
+  <desc id="desc">A Janissary headpiece set against a Bosporus crescent.</desc>
+  <path fill="#722c3b" d="M62 462V226C62 91 143 28 256 28s194 63 194 198v236z"/><path fill="none" stroke="#38a9a3" stroke-width="15" d="M90 434V230c0-110 64-174 166-174s166 64 166 174v204z"/><path fill="#f2e4ca" d="M170 350V191c0-74 38-117 86-117s86 43 86 117v159z"/><path fill="#38a9a3" d="M169 185h174v54H169z"/><text x="219" y="292" text-anchor="middle" fill="#722c3b" font-family="Arial Black,Arial,sans-serif" font-size="83" font-weight="900">I</text><text x="289" y="320" text-anchor="middle" fill="#722c3b" font-family="Georgia,serif" font-size="91" font-weight="700">J</text><path fill="#38a9a3" d="M201 333h110v43H201z"/><path fill="#722c3b" d="M256 115a48 48 0 1 0 0 96 37 37 0 1 1 0-96z"/>
+</svg>

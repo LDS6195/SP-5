@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">New York Knights logo</title>
+  <desc id="desc">A forward chess knight cut by Manhattan street lines.</desc>
+  <path fill="#101d35" d="M78 52h356v244c0 92-74 142-178 174C152 438 78 388 78 296z"/><path fill="none" stroke="#d3d7dd" stroke-width="14" d="M101 78h310v212c0 72-55 113-155 146-100-33-155-74-155-146z"/><path fill="#d3d7dd" d="M148 347V213c0-91 55-139 135-139 50 0 91 17 124 54l-72 47 31 42-39 35v95z"/><path fill="#101d35" d="M178 222h151v71H178z"/><path fill="#d5a93f" d="m255 76 33-49 22 58 59-11-42 44-42-24z"/><text x="253" y="278" text-anchor="middle" fill="#d5a93f" font-family="Georgia,serif" font-size="58" font-weight="700">NY</text><path stroke="#d5a93f" stroke-width="13" d="M135 372h232"/>
+</svg>

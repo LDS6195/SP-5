@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">Stockholm Isles logo</title>
+  <desc id="desc">Three granite islands linked across cold northern water.</desc>
+  <circle cx="256" cy="256" r="222" fill="#175d91"/><circle cx="256" cy="256" r="188" fill="none" stroke="#f3c52f" stroke-width="18"/><circle cx="256" cy="256" r="151" fill="#175d91" stroke="#edf4f4" stroke-width="5"/><path fill="#f3c52f" d="m128 287 73-101 55 70 60-119 74 150z"/><path fill="none" stroke="#edf4f4" stroke-width="13" d="M111 330c57-28 106-28 145 0 39-28 88-28 145 0m-278 49c50-25 94-25 133 0 39-25 83-25 133 0"/><text x="256" y="421" text-anchor="middle" fill="#f3c52f" stroke="#175d91" stroke-width="7" paint-order="stroke fill" font-family="Arial,sans-serif" font-size="47" font-weight="900">SI</text>
+</svg>

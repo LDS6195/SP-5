@@ -1,0 +1,635 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#11100e">
+  <title>EarthWar 3K</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anybody:ital,wdth,wght@0,75,400;0,75,600;0,75,800;0,110,700;1,75,600&amp;family=Afacad+Flux:wght@400;500;600&amp;family=Barlow+Condensed:ital,wght@0,600;0,700;0,800;1,600;1,700&amp;family=Fragment+Mono:ital@0;1&amp;family=Fraunces:opsz,wght@9..144,500;9..144,650;9..144,750&amp;family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-theme="broadcast" data-mobile-view="prospect">
+  <section class="game-screen main-menu-screen" id="mainMenu" aria-labelledby="gameTitle">
+    <img class="menu-backdrop" src="rules/home.jpg" alt="An EWSL arena in orbit above a planet">
+    <div class="menu-patina" aria-hidden="true"></div>
+    <header class="menu-masthead">
+      <img class="menu-insignia" src="rules/EWSL-logo.png" alt="EWSL">
+      <span>Earth War Simulation League</span>
+      <strong>Year 3000</strong>
+    </header>
+    <div class="menu-content">
+      <h1 id="gameTitle"><img class="game-logo" src="rules/EarthWar3K.png" alt="EarthWar 3K"></h1>
+      <p>Build history's greatest squad. Watch the future of warfare unfold.</p>
+      <nav class="menu-actions" aria-label="Game menu">
+        <button class="menu-action primary" id="continueGameButton" disabled><span>01</span><strong>Continue</strong><i id="continueGameLabel">No franchise found</i></button>
+        <button class="menu-action" id="newGameButton"><span>02</span><strong>New Game</strong><i>Begin franchise briefing</i></button>
+        <button class="menu-action" id="loadGameButton"><span>03</span><strong>Load Game</strong><i>Local saves and imports</i></button>
+        <button class="menu-action" id="rulesButton"><span>04</span><strong>Rules</strong><i>League handbook</i></button>
+      </nav>
+    </div>
+    <footer class="menu-footer">
+      <span>EWSL Simulation Grid</span>
+      <span>All clones accounted for</span>
+    </footer>
+  </section>
+
+  <section class="game-screen rules-screen" id="rulesScreen" aria-labelledby="rulesTitle" hidden>
+    <header class="rules-header"><button class="match-back" id="rulesBackButton" aria-label="Return to main menu">←</button><div><span class="menu-kicker">EWSL Official Rule Book</span><h1 id="rulesTitle">How to Play</h1></div><button id="skipRulesButton">Exit Rules</button></header>
+    <main class="rules-stage">
+      <div class="rules-book">
+      <nav class="rules-toc" aria-label="Rule book contents"><img class="rules-toc-logo" src="rules/EWSL-logo.png" alt="Earth War Simulation League"><span class="rules-toc-title">Contents</span><ol id="rulesToc"></ol></nav>
+      <div class="rules-page">
+      <div class="rules-slide active" data-rule-slide="0"><span class="menu-kicker">01 // The Premise</span><h2>The greatest who ever lived. One battlefield.</h2><p>It is the year 3000. Earth has detected hostile alien worlds and is preparing for a war it cannot afford to lose. To get ready, humanity has cloned the greatest individuals in history: athletes, commanders, fighters, and artists.</p><p>They compete in the <b>Earth War Simulation League (EWSL)</b>, a series of hyperrealistic, non-lethal war simulations. Thirty franchises battle to discover which combinations of talent and strategy win. Every match is data for Earth's defense. You run one franchise.</p></div>
+      <div class="rules-slide" data-rule-slide="1"><span class="menu-kicker">02 // The Teams</span><h2>1 General. 8 Specialists. 91 Units.</h2><p>Each side takes the field with one <b>General</b>, eight <b>Specialists</b>, and 91 <b>units</b>: the rank-and-file force that fights, holds ground, and falls.</p><ul class="rules-list"><li><b>2 Bruisers</b> Elimination, zone defense, assaults</li><li><b>2 Runners</b> Deliver payloads to capture zones</li><li><b>2 Cannons</b> Launch payloads to blast units or set up Runners</li><li><b>1 Visual + 1 Sonic Signaler</b> Relay orders, gather intel, send decoys</li></ul><p>Your roster holds 12: nine starters plus a backup Cannon, Runner, and Bruiser. Every player has a natural position. A few rare stars can flex into others; everyone else struggles out of position.</p></div>
+      <div class="rules-slide" data-rule-slide="2"><span class="menu-kicker">03 // Winning</span><h2>Three ways to win.</h2><ul class="rules-list"><li><b>Elimination</b> Wipe out every one of your opponent's units.</li><li><b>Control</b> Hold zones to earn points. First to 500 wins.</li><li><b>Time</b> If neither happens in 30 minutes, the team leading on zone points wins.</li></ul><p>Most matches are decided by Control, but a dominant fighting force can end things early, and a tight defensive game can go the distance.</p></div>
+      <div class="rules-slide" data-rule-slide="3"><span class="menu-kicker">04 // Zone Control</span><h2>Launch. Catch. Deliver.</h2><ul class="rules-list"><li><b>Launch</b> Cannons fire payloads across the map, at enemy units or toward their own Runners.</li><li><b>Impact</b> A payload that is not caught by a Runner detonates on landing, damaging everything in its blast radius.</li><li><b>Live ball</b> After landing, anyone can pick a payload up. It stays live until a delivery is made.</li><li><b>Delivery</b> Only Runners can handle a payload inside a zone and complete a delivery. Cannon shots cannot be legally caught inside a zone.</li><li><b>Dismantle</b> Runners can intercept shots and pull payloads out of enemy zones. A dismantled payload must be returned to a Cannon, by any player, before it is live again.</li></ul></div>
+      <div class="rules-slide" data-rule-slide="4"><img class="rules-art" src="rules/general.jpg" alt="General position illustration"><span class="menu-kicker">05 // Position</span><h2>General</h2><p><strong>The coach on the field.</strong> Generals lead the team through strategy. They read the battlefield, make quick decisions, and keep the squad executing under pressure.</p><p class="rules-keys">Key ratings: Tactical IQ // Leadership // Awareness // Composure</p></div>
+      <div class="rules-slide" data-rule-slide="5"><img class="rules-art" src="rules/bruiser2.jpg" alt="Bruiser position illustration"><span class="menu-kicker">06 // Position</span><h2>Bruiser</h2><p><strong>Boots on the ground.</strong> Bruisers lead the elimination work. They deal damage to opposing forces, defend zones, and lead attacks to clear a zone or pull the enemy away from one.</p><p class="rules-keys">Key ratings: Strength // Resilience // Defense // Power</p></div>
+      <div class="rules-slide" data-rule-slide="6"><img class="rules-art" src="rules/runner.jpg" alt="Runner position illustration"><span class="menu-kicker">07 // Position</span><h2>Runner</h2><p><strong>The scorers.</strong> Runners capture zones by delivering payloads into them. They can intercept enemy Cannon shots and dismantle payloads from enemy-held zones.</p><p class="rules-keys">Key ratings: Speed // Agility // Evasion // Handling</p></div>
+      <div class="rules-slide" data-rule-slide="7"><img class="rules-art" src="rules/cannon.jpg" alt="Cannon position illustration"><span class="menu-kicker">08 // Position</span><h2>Cannon</h2><p><strong>Artillery and playmaking.</strong> Cannons launch payloads to clear out hordes of units, or line up their Runners for a zone run. Any teammate can help reposition a Cannon, but a great Cannon can line up a shot from almost anywhere on the map.</p><p class="rules-keys">Key ratings: Precision // Range // Power // Composure</p></div>
+      <div class="rules-slide" data-rule-slide="8"><img class="rules-art" src="rules/v-sig.jpg" alt="Visual Signaler position illustration"><span class="menu-kicker">09 // Position</span><h2>Visual Signaler</h2><p><strong>Eyes of the team.</strong> Visual Signalers relay the General's orders and uncover battlefield intel: enemy locations, Cannon trajectories, and more. The best can disguise their signal as the opponent's, creating a convincing decoy.</p><p class="rules-keys">Key ratings: Visual Signal // Creativity // Awareness // Coordination</p></div>
+      <div class="rules-slide" data-rule-slide="9"><img class="rules-art" src="rules/s-sig.jpg" alt="Sonic Signaler position illustration"><span class="menu-kicker">10 // Position</span><h2>Sonic Signaler</h2><p><strong>Voice of the team.</strong> Sonic Signalers carry orders and intel through sound, keeping the squad coordinated when sight lines break down. They can also fake an enemy signal to send the opponent chasing a decoy.</p><p class="rules-keys">Key ratings: Sonic Signal // Coordination // Creativity // Composure</p></div>
+      <div class="rules-slide" data-rule-slide="10"><span class="menu-kicker">11 // Your Role</span><h2>You run the front office.</h2><ul class="rules-list"><li><b>Draft</b> Build a 12-player roster from all of history in a snake draft.</li><li><b>Prepare</b> Before each match, study the opponent and set formation, tempo, objective focus, and risk.</li><li><b>Compete</b> Once the match starts, your squad plays on its own. Watch it live or quick sim.</li><li><b>Season</b> Sixteen weeks, then playoffs. Six teams per conference qualify.</li><li><b>Offseason</b> Players' form rises or falls with performance. Protect six players, then rebuild through the renewal draft.</li></ul></div>
+      <nav class="rules-nav"><button class="rules-prev" id="rulesPrevButton">← Back</button><span id="rulesCounter">1 / 11</span><button class="rules-next" id="rulesNextButton">Next <span>→</span></button></nav>
+      </div>
+      </div>
+    </main>
+  </section>
+
+  <section class="game-screen franchise-screen" id="franchiseScreen" aria-labelledby="franchiseTitle" hidden>
+    <header class="franchise-header">
+      <button class="match-back" id="franchiseBackButton" aria-label="Return to main menu">←</button>
+      <div><img class="league-mark" src="rules/EWSL-logo.png" alt=""><span class="menu-kicker">EWSL Franchise Authorization</span><h1 id="franchiseTitle">Choose Your Command</h1></div>
+      <span class="team-count-label">30 franchises // mixed field</span>
+    </header>
+    <main class="franchise-layout">
+      <section class="franchise-grid" id="franchiseGrid" aria-label="Available franchises"></section>
+      <aside class="franchise-dossier">
+        <div class="selected-logo-stage"><img id="selectedFranchiseLogo" alt=""></div>
+        <span class="menu-kicker" id="selectedFranchiseConference">Americas Conference</span>
+        <h2 id="selectedFranchiseName">Chicago Wind</h2>
+        <dl>
+          <div><dt>Home Field</dt><dd id="selectedFranchiseField">Civic Rotunda</dd></div>
+        </dl>
+        <button class="confirm-franchise" id="confirmFranchiseButton">Assume Command <span>→</span></button>
+      </aside>
+    </main>
+  </section>
+
+  <section class="game-screen squad-screen" id="squadScreen" aria-labelledby="squadTitle" hidden>
+    <header class="squad-header">
+      <button class="match-back" id="squadBackButton" aria-label="Return to franchise">←</button>
+      <div><span class="menu-kicker" id="squadSeasonLabel">Season 08 // Personnel</span><h1 id="squadTitle">Free Agents</h1></div>
+      <div class="transaction-limit"><span>Transactions</span><strong id="transactionCount">0 / 4</strong></div>
+    </header>
+    <main class="squad-layout">
+      <section class="squad-roster-panel">
+        <header><div><span class="menu-kicker">Active Contract</span><h2 id="squadTeamName">Chicago Wind</h2></div><span>12 players</span></header>
+        <div class="squad-player-list" id="squadPlayerList"></div>
+      </section>
+      <section class="free-agent-panel">
+        <header><div><span class="menu-kicker">Available Pool</span><h2>Free Agents</h2></div><label><span class="sr-only">Search free agents</span><input id="freeAgentSearch" type="search" placeholder="Search players"></label></header>
+        <div class="free-agent-list" id="freeAgentList"></div>
+      </section>
+      <aside class="transaction-desk" id="transactionDesk"></aside>
+    </main>
+  </section>
+
+  <section class="game-screen season-screen" id="seasonScreen" aria-labelledby="seasonTitle" hidden>
+    <header class="season-header">
+      <button class="match-back" id="seasonBackButton" aria-label="Return to franchise">←</button>
+      <div><img class="league-mark" src="rules/EWSL-logo.png" alt=""><span class="menu-kicker" id="seasonCycleLabel">Season 08 // League Office</span><h1 id="seasonTitle">Schedule</h1></div>
+      <div class="season-record"><span id="seasonTeamName">Chicago Wind</span><strong id="seasonRecord">2–1</strong><small id="seasonConference">Americas Conference</small></div>
+    </header>
+
+    <main class="season-workspace">
+      <nav class="season-subnav" aria-label="Season view">
+        <button class="season-view-button active" data-season-view="schedule">Schedule</button>
+        <button class="season-view-button" data-season-view="standings">Standings</button>
+        <button class="season-view-button" data-season-action="lineup">Lineup &amp; Strategy</button>
+        <button class="season-view-button" data-season-action="free-agents">Free Agents</button>
+        <button class="season-view-button" data-season-action="records">Stats</button>
+        <button class="season-view-button" data-season-action="trophies">Trophy Room</button>
+      </nav>
+      <section class="schedule-panel">
+        <header class="season-panel-header">
+          <div><span class="menu-kicker">Regular Season</span><h2>16-Game Slate</h2></div>
+          <span id="seasonProgress">Week 4 of 16</span>
+        </header>
+        <div class="schedule-list" id="scheduleList"></div>
+      </section>
+
+      <aside class="game-detail-panel" id="gameDetailPanel">
+        <div id="gameDetail"></div>
+      </aside>
+
+      <section class="standings-panel" id="standingsPanel" hidden>
+        <header class="season-panel-header"><div><span class="menu-kicker">League Table</span><h2>Conference Standings</h2></div><span>Top six qualify</span></header>
+        <div class="conference-standings" id="conferenceStandings"></div>
+      </section>
+
+      <aside class="season-side-panel">
+        <section>
+          <span class="menu-kicker">Conference Position</span>
+          <div class="standing-rank"><strong>04</strong><span>of 15</span></div>
+          <p>Two games behind the Cairo Vanguard.</p>
+        </section>
+        <section>
+          <span class="menu-kicker">Season Leaders</span>
+          <dl class="season-leaders">
+            <div><dt>Rating</dt><dd>LeBron <b>8.4</b></dd></div>
+            <div><dt>Eliminations</dt><dd>Curry <b>18</b></dd></div>
+            <div><dt>Captures</dt><dd>Serena <b>11</b></dd></div>
+          </dl>
+        </section>
+        <section class="postseason-control" id="postseasonControl"></section>
+      </aside>
+    </main>
+  </section>
+
+  <section class="game-screen playoffs-screen" id="playoffsScreen" aria-labelledby="playoffsTitle" hidden>
+    <header class="playoffs-header">
+      <button class="match-back" id="playoffsBackButton" aria-label="Return to season hub">←</button>
+      <div><img class="league-mark" src="rules/EWSL-logo.png" alt=""><span class="menu-kicker" id="playoffsSeasonLabel">Season 08 // Postseason</span><h1 id="playoffsTitle">Road to the Final</h1></div>
+      <div class="playoff-status"><span>Current Round</span><strong id="playoffRoundLabel">Wild Card</strong></div>
+    </header>
+    <main class="playoffs-layout">
+      <section class="bracket-board" id="bracketBoard"></section>
+      <aside class="playoff-command" id="playoffCommand"></aside>
+    </main>
+    <aside class="playoff-boxscore-modal" id="playoffBoxscoreModal" hidden aria-labelledby="playoffBoxscoreTitle">
+      <header><div><span class="menu-kicker">Performance Desk</span><h2 id="playoffBoxscoreTitle">Playoff Box Score</h2></div><button id="closePlayoffBoxscore" aria-label="Close playoff box score">×</button></header>
+      <div id="playoffBoxscoreContent"></div>
+    </aside>
+    <aside class="championship-modal" id="championshipModal" hidden aria-labelledby="championshipTitle">
+      <div class="confetti" aria-hidden="true"></div>
+      <div class="championship-card">
+        <button class="championship-close" id="closeChampionship" aria-label="Close championship announcement">×</button>
+        <img class="championship-league-mark" src="rules/EWSL-logo.png" alt="EWSL">
+        <span class="menu-kicker">EWSL League Final // Transmission Confirmed</span>
+        <img id="championshipLogo" alt="">
+        <h2 id="championshipTitle">Champions</h2>
+        <p id="championshipMessage">The EWSL has a new champion.</p>
+        <button data-championship-action="continue">Return to Playoffs <span>→</span></button>
+      </div>
+    </aside>
+  </section>
+
+  <section class="game-screen awards-screen" id="awardsScreen" aria-labelledby="awardsTitle" hidden>
+    <header class="awards-header">
+      <button class="match-back" id="awardsBackButton" aria-label="Return to season hub">←</button>
+      <div><img class="league-mark" src="rules/EWSL-logo.png" alt=""><span class="menu-kicker" id="awardsSeasonLabel">Season 01 // Honors Office</span><h1 id="awardsTitle">Season Awards</h1></div>
+      <div class="awards-phase" id="awardsPhaseLabel">Regular Season</div>
+    </header>
+    <main class="awards-layout">
+      <section class="awards-board" id="awardsBoard"></section>
+      <aside class="awards-command" id="awardsCommand"></aside>
+    </main>
+  </section>
+
+  <section class="game-screen progression-screen" id="progressionScreen" aria-labelledby="progressionTitle" hidden>
+    <header class="progression-header"><button class="match-back" id="progressionBackButton" aria-label="Return to awards">←</button><div><span class="menu-kicker" id="progressionSeasonLabel">Season 01 // Form Report</span><h1 id="progressionTitle">Season Progression</h1></div><div class="progression-status">Postseason complete</div></header>
+    <main class="progression-layout">
+      <section class="progression-board"><header><div><span class="menu-kicker">Player Development</span><h2 id="progressionTeamName">Team Progression</h2></div><span>12 players</span></header><div class="progression-grid" id="progressionGrid"></div></section>
+      <aside class="progression-command" id="progressionCommand"></aside>
+    </main>
+  </section>
+
+  <section class="game-screen offseason-screen" id="offseasonScreen" aria-labelledby="offseasonTitle" hidden>
+    <header class="offseason-header">
+      <button class="match-back" id="offseasonBackButton" aria-label="Return to playoffs">←</button>
+      <div><span class="menu-kicker" id="offseasonSeasonLabel">Season 08 // Roster Renewal</span><h1 id="offseasonTitle">Protect Your Core</h1></div>
+      <div class="offseason-status"><span id="offseasonPhaseLabel">Protection Phase</span><strong id="offseasonCount">0 / 6</strong></div>
+    </header>
+    <main class="offseason-layout">
+      <section class="offseason-board">
+        <header><div><span class="menu-kicker" id="offseasonBoardLabel">Current Roster</span><h2 id="offseasonBoardTitle">Select Six Players</h2></div><span id="offseasonPoolCount">12 rostered</span></header>
+        <div class="offseason-grid" id="offseasonGrid"></div>
+      </section>
+      <aside class="offseason-command" id="offseasonCommand"></aside>
+    </main>
+  </section>
+
+  <section class="game-screen records-screen" id="recordsScreen" aria-labelledby="recordsTitle" hidden>
+    <header class="records-header">
+      <button class="match-back" id="recordsBackButton" aria-label="Return to franchise">←</button>
+      <div><img class="league-mark" src="rules/EWSL-logo.png" alt=""><span class="menu-kicker" id="recordsCycleLabel">League Archive // Season 08</span><h1 id="recordsTitle">Records Office</h1></div>
+      <div class="records-season"><span>Active Season</span><strong id="recordsSeasonNumber">08</strong><small id="recordsGamesPlayed">0 league games</small></div>
+    </header>
+    <nav class="records-tabs" aria-label="Record category">
+      <button class="records-tab active" data-record-view="players">Stats</button>
+      <button class="records-tab" data-record-view="generals">General Stats</button>
+      <button class="records-tab" data-record-view="season">Season Records</button>
+      <button class="records-tab" data-record-view="games">Game Records</button>
+      <button class="records-tab" data-record-view="career">Career Leaders</button>
+      <button class="records-tab" data-record-view="history">League History</button>
+      <button class="records-tab" data-record-view="trophies">Trophy Room</button>
+    </nav>
+    <main class="records-workspace">
+      <header class="records-table-header">
+        <div><span class="menu-kicker" id="recordsEyebrow">Season 08</span><h2 id="recordsViewTitle">Player Statistics</h2></div>
+        <label class="records-sort"><span>Rank by</span><select id="recordsStatSelect"></select></label>
+      </header>
+      <div id="recordsContent"></div>
+    </main>
+    <aside class="player-history-panel" id="playerHistoryPanel" hidden>
+      <button id="playerHistoryClose" aria-label="Close player history">×</button>
+      <div id="playerHistoryContent"></div>
+    </aside>
+  </section>
+
+  <section class="game-screen strategy-screen" id="strategyScreen" aria-labelledby="strategyTitle" hidden>
+    <header class="strategy-header">
+      <button class="match-back" id="strategyBackButton" aria-label="Return to main menu">←</button>
+      <div><span class="menu-kicker">Week 01 // Pre-Match</span><h1 id="strategyTitle">Strategy Room</h1></div>
+      <div class="strategy-opponent"><span>Opponent</span><strong>Berlin Union</strong><small>Civic Rotunda // Neutral</small></div>
+    </header>
+
+    <main class="strategy-workspace">
+      <section class="strategy-board">
+        <header><div><span class="menu-kicker">Active Nine</span><h2 id="strategyTeamName">Chicago Wind</h2></div><button id="bestLineupButton" type="button">Auto Lineup</button><strong id="activeLineupOverall">91 OVR</strong></header>
+        <div class="strategy-lineup" id="strategyLineup"></div>
+        <div class="strategy-reserves"><span class="menu-kicker">Reserves</span><div id="strategyReserves"></div></div>
+      </section>
+
+      <form class="game-plan" id="gamePlanForm">
+        <header><span class="menu-kicker">Command Inputs</span><h2>Game Plan</h2></header>
+
+        <fieldset class="formation-fieldset">
+          <legend><span>01</span> Formation</legend>
+          <div class="formation-options">
+            <label><input type="radio" name="formation" value="balanced" checked><span><b>Balanced</b><small>Stable across all five zones</small></span></label>
+            <label><input type="radio" name="formation" value="pressure"><span><b>Pressure</b><small>Fast captures, exposed rear</small></span></label>
+            <label><input type="radio" name="formation" value="fortress"><span><b>Fortress</b><small>Hold zones and preserve units</small></span></label>
+            <label><input type="radio" name="formation" value="longRange"><span><b>Long Range</b><small>Cannon lanes and denial fire</small></span></label>
+            <label><input type="radio" name="formation" value="wide"><span><b>Wide</b><small>Contest every objective</small></span></label>
+            <label><input type="radio" name="formation" value="overload"><span><b>Overload</b><small>Collapse onto priority zones</small></span></label>
+            <label><input type="radio" name="formation" value="escort"><span><b>Escort</b><small>Bruisers screen the Runners</small></span></label>
+            <label><input type="radio" name="formation" value="counter"><span><b>Counter</b><small>Yield space, punish advances</small></span></label>
+          </div>
+        </fieldset>
+
+        <div class="plan-row">
+          <fieldset>
+            <legend><span>02</span> Tempo</legend>
+            <div class="segment-control">
+              <label><input type="radio" name="tempo" value="patient"><span>Patient</span></label>
+              <label><input type="radio" name="tempo" value="balanced" checked><span>Balanced</span></label>
+              <label><input type="radio" name="tempo" value="fast"><span>Fast</span></label>
+            </div>
+          </fieldset>
+          <fieldset>
+            <legend><span>03</span> Objective</legend>
+            <div class="segment-control">
+              <label><input type="radio" name="focus" value="control"><span>Control</span></label>
+              <label><input type="radio" name="focus" value="balanced" checked><span>Balanced</span></label>
+              <label><input type="radio" name="focus" value="elimination"><span>Eliminate</span></label>
+            </div>
+          </fieldset>
+          <fieldset>
+            <legend><span>04</span> Risk</legend>
+            <div class="segment-control">
+              <label><input type="radio" name="risk" value="conservative"><span>Conservative</span></label>
+              <label><input type="radio" name="risk" value="balanced" checked><span>Balanced</span></label>
+              <label><input type="radio" name="risk" value="aggressive"><span>Aggressive</span></label>
+            </div>
+          </fieldset>
+        </div>
+      </form>
+
+      <aside class="plan-analysis">
+        <header><span class="menu-kicker">Live Projection</span><h2>Plan Profile</h2></header>
+        <div class="plan-meters">
+          <div><span>Zone Pressure</span><strong id="planControlValue">76</strong><i><b id="planControlBar" style="width:76%"></b></i></div>
+          <div><span>Firepower</span><strong id="planCombatValue">84</strong><i><b id="planCombatBar" style="width:84%"></b></i></div>
+          <div><span>Survival</span><strong id="planDefenseValue">81</strong><i><b id="planDefenseBar" style="width:81%"></b></i></div>
+          <div><span>Mobility</span><strong id="planMobilityValue">86</strong><i><b id="planMobilityBar" style="width:86%"></b></i></div>
+        </div>
+        <div class="opponent-card">
+          <span>Scouted Berlin Plan</span>
+          <strong>Counterattack</strong>
+          <p>Patient tempo // Zone focus // Balanced risk</p>
+        </div>
+        <p class="plan-note" id="planNote">No pronounced weakness. Reliable spacing and measured pressure across all five zones.</p>
+        <button class="launch-match" id="launchMatchButton" type="button">Lock Plan &amp; Simulate <span>→</span></button>
+      </aside>
+    </main>
+  </section>
+
+  <section class="game-screen match-screen" id="matchScreen" aria-labelledby="matchTitle" hidden>
+    <header class="match-topbar">
+      <button class="match-back" id="matchBackButton" aria-label="Return to main menu">←</button>
+      <div><span>Week 01 // Exhibition</span><strong id="matchTitle">Chicago Wind vs Berlin Union</strong></div>
+      <div class="match-controls">
+        <button class="transport-control" id="matchPauseButton" aria-pressed="false"><b aria-hidden="true">Ⅱ</b><span class="control-label">Pause</span></button>
+        <div class="speed-console" role="group" aria-label="Simulation speed">
+          <span class="console-label">Clock Rate</span>
+          <button class="speed-button" data-speed="12" title="Approximately 2.5 minutes"><i></i><span>Slow</span></button>
+          <button class="speed-button active" data-speed="30" title="Approximately 60 seconds"><i></i><span>Standard</span></button>
+          <button class="speed-button" data-speed="90" title="Approximately 20 seconds"><i></i><span>Super</span></button>
+        </div>
+        <button class="resolve-control" id="matchSkipButton"><b aria-hidden="true">»</b><span>Resolve</span><small>Skip to result</small></button>
+      </div>
+    </header>
+    <div class="match-completion-actions" id="matchCompletionActions" hidden>
+      <button id="matchContinueButton">Continue to Results <span>→</span></button>
+    </div>
+
+    <section class="score-ribbon" aria-label="Match score">
+      <div class="score-team team-home"><img id="homeTeamLogo" src="logos/chicago-wind.svg" alt=""><span id="homeTeamAbbr">CHI</span><strong id="homeScore">0</strong><small id="homeTeamLabel">Wind</small></div>
+      <div class="match-clock"><span>Control // First to 500</span><strong id="matchClock">30:00</strong><small id="matchState">Simulation ready</small></div>
+      <div class="score-team team-away"><img id="awayTeamLogo" src="logos/teams/berlin-union.svg" alt=""><strong id="awayScore">0</strong><span id="awayTeamAbbr">BER</span><small id="awayTeamLabel">Union</small></div>
+    </section>
+
+    <main class="match-workspace">
+      <section class="field-panel">
+        <div class="field-heading">
+          <div><span class="menu-kicker">Biome 04 // Civic Rotunda</span><h2>Live Tactical Field</h2></div>
+          <div class="field-legend"><span class="home-key" id="homeFieldLabel">Home</span><span class="away-key" id="awayFieldLabel">Away</span><span class="grunt-key">Squad units</span></div>
+        </div>
+        <div class="field-frame">
+          <canvas id="matchCanvas" aria-label="Animated tactical map showing unit clusters and zone control"></canvas>
+          <div class="zone-readout" aria-label="Zone ownership">
+            <div data-zone-readout="0"><span>Alpha</span><strong>Neutral</strong><i><b></b></i></div>
+            <div data-zone-readout="1"><span>Bravo</span><strong>Neutral</strong><i><b></b></i></div>
+            <div data-zone-readout="2"><span>Charlie</span><strong>Neutral</strong><i><b></b></i></div>
+            <div data-zone-readout="3"><span>Delta</span><strong>Neutral</strong><i><b></b></i></div>
+            <div data-zone-readout="4"><span>Echo</span><strong>Neutral</strong><i><b></b></i></div>
+          </div>
+        </div>
+        <div class="force-bars">
+          <div><span>Chicago units</span><strong id="homeUnits">100</strong><i><b id="homeUnitsBar" style="width:100%"></b></i></div>
+          <div><span>Berlin units</span><strong id="awayUnits">100</strong><i><b id="awayUnitsBar" style="width:100%"></b></i></div>
+        </div>
+      </section>
+
+      <aside class="commentary-panel">
+        <header><span class="live-pulse">Live</span><h2>Match Wire</h2></header>
+        <ol id="commentaryFeed" aria-live="polite"></ol>
+      </aside>
+
+      <section class="box-score-panel">
+        <header class="box-score-header">
+          <div><span class="menu-kicker">Performance Desk</span><h2>Player Box Score</h2></div>
+          <div class="box-tabs" role="tablist" aria-label="Team box score">
+            <button class="box-tab active" role="tab" data-box-team="home" aria-selected="true" id="homeBoxTab">Home</button>
+            <button class="box-tab" role="tab" data-box-team="away" aria-selected="false" id="awayBoxTab">Away</button>
+          </div>
+        </header>
+        <div class="box-table-wrap">
+          <table class="box-table">
+            <thead><tr><th>Player</th><th>Role</th><th>RTG</th><th>ELIM</th><th>AST</th><th>CAP</th><th>DEF</th><th>INT</th><th>Carry</th><th>Coverage</th><th>Contribution</th></tr></thead>
+            <tbody id="boxScoreBody"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </section>
+
+  <section class="game-screen load-screen" id="loadScreen" aria-labelledby="loadTitle" hidden>
+    <header class="load-header">
+      <button class="back-button" id="loadBackButton" aria-label="Return to main menu">←</button>
+      <div><span class="menu-kicker">Franchise Archive</span><h1 id="loadTitle">Load Game</h1></div>
+      <button class="manual-save-button" id="manualSaveButton">Save Current</button>
+    </header>
+    <div class="save-workspace">
+      <div class="save-ledger-header"><span>Local Franchises</span><strong id="saveCount">0 saves</strong></div>
+      <div class="save-list" id="saveList"></div>
+      <aside class="storage-note">
+        <span class="menu-kicker">Storage Doctrine</span>
+        <h2>Your league stays yours.</h2>
+        <p>Franchises are stored locally in the browser. Exported save files can be archived, moved between devices, and imported later.</p>
+        <div class="load-actions">
+          <label class="import-button" for="saveImport">Import Save</label>
+          <input class="sr-only" id="saveImport" type="file" accept=".proxy-save,.json,application/json">
+          <button id="exportAllButton">Export All</button>
+          <button id="loadNewGameButton">Start New Game</button>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <section class="game-screen intro-screen" id="introScreen" aria-labelledby="introTitle" hidden>
+    <img class="intro-backdrop" src="https://images.unsplash.com/photo-1444703686981-a3abbc4d4fe3?auto=format&amp;fit=crop&amp;w=2200&amp;q=86" alt="A deep field of stars">
+    <header class="intro-controls">
+      <span>Orientation Film // ESAC-01</span>
+      <div>
+        <button id="pauseIntroButton" aria-pressed="false">Pause</button>
+        <button id="introRulesButton">Rule Book</button>
+        <button id="skipIntroButton">Skip Briefing</button>
+      </div>
+    </header>
+    <div class="intro-fade" aria-hidden="true"></div>
+    <div class="crawl-viewport">
+      <article class="intro-crawl" id="introCrawl">
+        <img class="intro-logo" src="rules/EarthWar3K.png" alt="EarthWar 3K">
+        <span class="intro-date">Earth Standard Year 3000</span>
+        <h1 id="introTitle">Earth is going to war.<br>History is reporting for duty.</h1>
+        <p class="intro-lead">Earth has detected hostile alien worlds. To prepare for a war it cannot afford to lose, humanity has cloned the greatest individuals who ever lived and sent them into battle, in simulation.</p>
+
+        <section>
+          <span>Briefing 01 // The EWSL</span>
+          <h2>Brady, LeBron, and Mozart on the same playing field</h2>
+          <p>Athletes, commanders, fighters, and artists compete in the Earth War Simulation League: hyperrealistic, non-lethal war simulations. Thirty franchises fight to discover which combinations of talent and strategy win. Every match is data for Earth's defense.</p>
+          <p>You run one franchise.</p>
+        </section>
+
+        <section>
+          <span>Briefing 02 // The Battlefield</span>
+          <h2>1 General. 8 Specialists. 91 Units.</h2>
+          <div class="rule-grid">
+            <p><b>General</b> Calls the strategy and leads the team.</p>
+            <p><b>2 Bruisers</b> Eliminate enemies, defend zones, lead assaults.</p>
+            <p><b>2 Runners</b> Deliver payloads into zones to capture them.</p>
+            <p><b>2 Cannons</b> Launch payloads to blast units or set up Runners.</p>
+            <p><b>Visual + Sonic Signalers</b> Relay orders, uncover intel, send decoys.</p>
+            <p><b>3 Reserves</b> A backup Cannon, Runner, and Bruiser.</p>
+          </div>
+        </section>
+
+        <section>
+          <span>Briefing 03 // Victory</span>
+          <h2>Three ways to win</h2>
+          <div class="rule-grid">
+            <p><b>Elimination</b> Wipe out all enemy units.</p>
+            <p><b>Control</b> Hold zones. First to 500 points.</p>
+            <p><b>Time</b> Lead on zone points after 30 minutes.</p>
+          </div>
+        </section>
+
+        <section>
+          <span>Briefing 04 // Your Job</span>
+          <h2>Build it. Plan it. Watch it.</h2>
+          <p>Draft twelve players from all of history. Before each match, set your formation, tempo, objective focus, and risk. Then your squad fights on its own. Win the season, survive the playoffs, and rebuild in the offseason.</p>
+        </section>
+
+        <div class="intro-final">
+          <span>Your EWSL franchise has been authorized.</span>
+          <strong>Draft well. Earth is watching.</strong>
+          <button id="beginDraftButton">Choose Franchise <b>→</b></button>
+          <button class="intro-secondary" id="introRulesFinalButton">Read the Rule Book</button>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <div class="app-shell" id="gameInterface" hidden>
+    <header class="topbar">
+      <a class="brand" href="#" aria-label="EWSL home">
+        <img class="brand-logo" src="rules/EWSL-logo.png" alt="">
+        <span><b>EWSL</b><small>DRAFT</small></span>
+      </a>
+
+      <nav class="main-nav" aria-label="Draft workspace">
+        <button class="nav-current active" id="draftRoomTab" type="button">Draft Room</button>
+        <button class="nav-current" id="draftBoardTab" type="button">Draft Board</button>
+      </nav>
+
+      <div class="season-status">
+        <span id="globalSeasonLabel">Draft // Preseason</span>
+        <strong>PRESEASON</strong>
+      </div>
+    </header>
+
+    <main>
+      <section class="brief-strip" aria-label="Draft status">
+        <div>
+          <span class="eyebrow">Franchise Command</span>
+          <h1>Historical Draft</h1>
+        </div>
+        <div class="draft-clock">
+          <span>On the clock</span>
+          <strong id="draftClock">01:30</strong>
+        </div>
+        <button class="auto-draft-button" id="autoDraftButton">Auto Draft <span>→</span></button>
+        <div class="pick-status">
+          <span id="draftPickStatus">Round 1 / Pick 8</span>
+          <strong id="draftTeamStatus">Chicago Wind</strong>
+        </div>
+      </section>
+
+      <section class="workspace">
+        <aside class="roster-panel panel">
+          <header class="panel-header">
+            <div class="roster-team-heading"><img id="draftTeamLogo" src="logos/chicago-wind.svg" alt=""><div><span class="eyebrow">Your Board</span><h2 id="draftTeamName">Chicago Wind</h2></div></div>
+            <span class="capacity" id="rosterCapacity">0 / 12</span>
+          </header>
+          <div class="roster-list" id="rosterList"></div>
+          <div class="chemistry-summary">
+            <div class="chemistry-dial" style="--score: 68"><strong>68</strong><span>Chem</span></div>
+            <div>
+              <span class="eyebrow">Squad Identity</span>
+              <strong>Disciplined Vanguard</strong>
+              <p>+8% formation integrity under pressure</p>
+            </div>
+          </div>
+        </aside>
+
+        <section class="prospect-stage panel">
+          <header class="panel-header stage-header">
+            <div><span class="eyebrow">Recommended Prospect</span><h2 id="prospectRole">Cannon // Field Commander</h2></div>
+          </header>
+          <section class="draft-board" id="draftBoard" hidden aria-live="polite"></section>
+
+          <article class="prospect-card">
+            <div class="portrait-wrap">
+              <div class="portrait-backdrop"></div>
+              <img id="prospectPortrait" src="https://images.unsplash.com/photo-1568602471122-7832951cc4c5?auto=format&amp;fit=crop&amp;w=900&amp;q=85" alt="Portrait of draft prospect">
+              <div class="era-tag" id="prospectEra">Historical Reconstruction</div>
+            </div>
+            <div class="prospect-info">
+              <span class="rank">Prospect 014</span>
+              <h3 id="prospectName">Hannibal<br>Barca</h3>
+              <p class="prospect-summary">Elite improviser who turns terrain disadvantages into asymmetric openings. Volatile fit with rigid command structures.</p>
+
+              <div class="attribute-grid">
+                <div><span>Vision</span><strong>94</strong><i style="--value:94%"></i></div>
+                <div><span>Payload</span><strong>88</strong><i style="--value:88%"></i></div>
+                <div><span>Composure</span><strong>91</strong><i style="--value:91%"></i></div>
+                <div><span>Mobility</span><strong>72</strong><i style="--value:72%"></i></div>
+              </div>
+
+              <div class="traits">
+                <span>Alpine Route</span><span>Unorthodox</span><span>Siege Mind</span>
+              </div>
+
+              <div class="fit-callout">
+                <span class="fit-grade">A−</span>
+                <div><strong>Roster Fit</strong><p>Strong link with Tubman. Friction risk with Aurelius.</p></div>
+              </div>
+
+              <div class="draft-actions">
+                <button class="watch-button" id="watchButton"><span>◇</span> Watchlist</button>
+                <button class="draft-button" id="draftButton">Draft Hannibal <span>→</span></button>
+              </div>
+            </div>
+          </article>
+
+          <div class="draft-pool-toolbar">
+            <label><span class="sr-only">Search draft pool</span><input id="draftSearch" type="search" placeholder="Search 429 prospects"></label>
+            <div class="role-filters" role="group" aria-label="Filter by primary position">
+              <button class="role-filter active" data-role-filter="All">All</button>
+              <button class="role-filter" data-role-filter="General">GEN</button>
+              <button class="role-filter" data-role-filter="Cannon">CAN</button>
+              <button class="role-filter" data-role-filter="Runner">RUN</button>
+              <button class="role-filter" data-role-filter="Bruiser">BRU</button>
+              <button class="role-filter" data-role-filter="Visual" title="Visual Signaler">V-SIG</button>
+              <button class="role-filter" data-role-filter="Musical" title="Sonic Signaler">S-SIG</button>
+              <button class="role-filter" data-role-filter="Watchlist">WATCHLIST</button>
+            </div>
+            <span id="draftPoolSummary">Available prospects</span>
+          </div>
+          <div class="candidate-rail" id="candidateRail" aria-label="Available prospects"></div>
+        </section>
+
+        <aside class="intel-panel panel">
+          <header class="panel-header">
+            <div><span class="eyebrow">Live Analysis</span><h2>Compatibility</h2></div>
+            <span class="live-dot">Live</span>
+          </header>
+
+          <section class="intel-block">
+            <h3>Projected Links</h3>
+            <div class="link-map">
+              <span class="link-node central">HB</span>
+              <span class="link-node node-one">HT</span>
+              <span class="link-node node-two">MA</span>
+              <span class="link-node node-three">MU</span>
+              <i class="link-line line-one"></i><i class="link-line line-two"></i><i class="link-line line-three"></i>
+            </div>
+            <div class="synergy-row positive"><span>Harriet Tubman</span><strong>+14</strong></div>
+            <div class="synergy-row neutral"><span>Prince</span><strong>+06</strong></div>
+            <div class="synergy-row negative"><span>Marcus Aurelius</span><strong>−09</strong></div>
+          </section>
+
+          <section class="intel-block biome-block">
+            <span class="eyebrow">Season Forecast</span>
+            <h3>Biome Utility</h3>
+            <div class="biome-row"><span>Urban Ruins</span><i><b style="width:92%"></b></i><strong>Elite</strong></div>
+            <div class="biome-row"><span>Salt Flats</span><i><b style="width:81%"></b></i><strong>High</strong></div>
+            <div class="biome-row"><span>Dense Forest</span><i><b style="width:58%"></b></i><strong>Avg</strong></div>
+          </section>
+
+        </aside>
+      </section>
+    </main>
+
+    <footer class="ticker" aria-label="League draft ticker">
+      <span class="ticker-label">Draft Wire</span>
+      <div class="ticker-track"><span><b>BERLIN</b> selects Miyamoto Musashi // Bruiser</span><span><b>SEOUL</b> is on the clock</span><span><b>CAIRO</b> reviews the board</span></div>
+      <span class="connection">● Secure // 14ms</span>
+    </footer>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="player-ratings.js"></script>
+  <script src="player-data.js"></script>
+  <script src="draft-engine.js"></script>
+  <script src="franchise-engine.js"></script>
+  <script src="save-manager.js"></script>
+  <script src="app.js"></script>
+  <script src="match-sim.js"></script>
+</body>
+</html>

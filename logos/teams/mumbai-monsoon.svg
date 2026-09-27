@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">Mumbai Monsoon logo</title>
+  <desc id="desc">Monsoon rain folding into a gateway-shaped M.</desc>
+  <path fill="#26316d" d="M26 120 92 54h328l66 66-40 136 40 136-66 66H92l-66-66 40-136z"/><path fill="none" stroke="#39c5d8" stroke-width="14" d="M62 132 105 88h302l43 44-35 124 35 124-43 44H105l-43-44 35-124z"/><path fill="none" stroke="#39c5d8" stroke-width="22" d="M139 323V159l73 88 44-103 44 103 73-88v164"/><path stroke="#f4a62a" stroke-width="13" stroke-linecap="round" d="M151 94v41m70-72v46m70-46v46m70-15v41"/><text x="256" y="393" text-anchor="middle" fill="#f4a62a" font-family="Arial Narrow,Arial,sans-serif" font-size="36" font-weight="700">MONSOON</text>
+</svg>

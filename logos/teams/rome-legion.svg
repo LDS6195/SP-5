@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">Rome Legion logo</title>
+  <desc id="desc">A legionary helmet cut into SPQR-red armor.</desc>
+  <path fill="#5a1824" d="M78 52h356v244c0 92-74 142-178 174C152 438 78 388 78 296z"/><path fill="none" stroke="#d5a84b" stroke-width="14" d="M101 78h310v212c0 72-55 113-155 146-100-33-155-74-155-146z"/><path fill="#d5a84b" d="M142 305V194c0-80 56-127 127-127 54 0 100 24 126 70l-91 27v141z"/><path fill="#1b1717" d="M184 199h120v54H184zM142 305h162v48H142z"/><path fill="#5a1824" d="M193 211h21v31h-21zm29 0h21v31h-21zm29 0h21v31h-21z"/><path fill="#d5a84b" d="M328 287h80v102h-80z"/><text x="368" y="354" text-anchor="middle" fill="#5a1824" font-family="Georgia,serif" font-size="59" font-weight="700">R</text>
+</svg>

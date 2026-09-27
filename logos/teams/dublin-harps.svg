@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">Dublin Harps logo</title>
+  <desc id="desc">A taut harp whose strings double as tactical lanes.</desc>
+  <path fill="#135d42" d="M42 82h428l-60 174 60 174H42l52-174z"/><path fill="none" stroke="#e5c66b" stroke-width="14" d="M73 109h359l-49 147 49 147H73l48-147z"/><text x="257" y="374" text-anchor="middle" fill="#f2e8cf" opacity=".22" font-family="Georgia,serif" font-size="285" font-weight="700">D</text><path fill="none" stroke="#e5c66b" stroke-width="25" stroke-linecap="round" d="M185 126c107 14 165 105 112 245M185 126v245h148"/><path stroke="#f2e8cf" stroke-width="8" d="M204 176h99M204 222h117M204 268h125M204 314h116"/>
+</svg>
