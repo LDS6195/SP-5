@@ -812,8 +812,9 @@ body[data-theme="broadcast"] .prospect-number { font-size: 110px; }
   .season-recap-actions { display: grid; grid-template-columns: 1fr 1fr; }.season-recap-actions button { padding: 0 8px; }.season-recap-actions button[data-recap-action="continue"] { grid-column: 1 / -1; }
 }
 @media (max-width: 480px) {
+  .season-recap-screen { max-width: 100vw; overflow-x: hidden; }
   .season-recap-header { min-height: 51px; grid-template-columns: 32px minmax(0, 1fr); gap: 3px 8px; padding: 5px 9px; }.season-recap-header .match-back { width: 31px; height: 31px; }.season-recap-header .menu-kicker { font-size: 7px; }.season-recap-header h1 { margin-top: 1px; font-size: 20px; }.season-recap-header > span { font-size: 8px; }
-  .season-recap-layout { padding: 5px 7px 28px; }
+  .season-recap-layout { width: 100%; min-width: 0; padding: 5px 7px 28px; }.season-recap-card { width: 100%; min-width: 0; }
   .recap-banner { min-height: 30px; gap: 1px 8px; padding: 4px 9px; }.recap-banner span { font-size: 7px; }.recap-banner strong { font-size: 14px; }
   .recap-identity { grid-template-columns: 36px minmax(0, 1fr) auto; gap: 6px; padding: 5px 9px; }.recap-identity img { width: 35px; height: 35px; }.recap-identity div > span { font-size: 7px; }.recap-identity h2 { margin: 2px 0; font-size: 18px; }.recap-identity p { max-width: 100%; overflow: hidden; font-size: 8px; text-overflow: ellipsis; white-space: nowrap; }.recap-identity > strong { grid-column: 3; grid-row: 1; padding: 0; border: 0; font-size: 23px; }.recap-identity > strong small { display: block; margin: 1px 0 0; font-size: 7px; }
   .recap-team-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); }.recap-team-stats div { min-width: 0; padding: 5px 6px; border-bottom: 0; border-right: 1px solid #af9979; }.recap-team-stats div:nth-child(2n) { border-right: 1px solid #af9979; }.recap-team-stats div:last-child { grid-column: auto; border-right: 0; }.recap-team-stats dt { font-size: 7px; }.recap-team-stats dd { margin-top: 2px; font-size: 18px; }
@@ -821,7 +822,7 @@ body[data-theme="broadcast"] .prospect-number { font-size: 110px; }
   .recap-roster { display: block; }.recap-player { position: relative; height: 36px; min-height: 0; display: grid; grid-template-columns: 33px 30px minmax(0, 1fr) auto; grid-template-rows: 34px; align-items: center; gap: 3px; padding: 1px 6px; border-right: 0; }.recap-player:nth-child(3n) { border-right: 0; }
   .recap-mobile-role { grid-column: 1; grid-row: 1; display: block; color: #8f2f24; font: 700 8px var(--mono); text-align: center; }.recap-player > img { grid-column: 2; grid-row: 1; width: 30px; height: 34px; min-width: 0; }
   .recap-player-info { grid-column: 3; grid-row: 1; min-width: 0; }.recap-player-info > span, .recap-player-numbers, .recap-honors { display: none; }.recap-player-info > strong { margin: 0; overflow: hidden; font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
-  .recap-mobile-stats { grid-column: 4; grid-row: 1; display: flex; gap: 5px; }.recap-mobile-stats span { display: flex; align-items: baseline; gap: 2px; white-space: nowrap; }.recap-mobile-stats b { color: #2b2119; font: 700 11px var(--mono); }.recap-mobile-stats small { color: #675847; font: 8px var(--mono); text-transform: uppercase; }
+  .recap-mobile-stats { grid-column: 4; grid-row: 1; display: flex; min-width: 0; gap: 5px; }.recap-mobile-stats span { display: flex; align-items: baseline; gap: 2px; white-space: nowrap; }.recap-mobile-stats b { color: #2b2119; font: 700 11px var(--mono); }.recap-mobile-stats small { color: #675847; font: 8px var(--mono); text-transform: uppercase; }
   .recap-player.honored { height: auto; min-height: 52px; grid-template-rows: minmax(50px, auto); box-shadow: inset 3px 0 #8f2f24; }
   .recap-player.honored .recap-player-info { align-self: center; padding: 2px 0; }
   .recap-player.honored .recap-honors { display: flex; flex-wrap: wrap; gap: 2px; margin-top: 3px; }
