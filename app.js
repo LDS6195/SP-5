@@ -486,20 +486,30 @@ function renderAwards() {
     const championGames = playoffGames.filter((game) => game.homeTeamId === champion.id || game.awayTeamId === champion.id);
     const playoffWins = championGames.filter((game) => winnerOf(game) === champion.id).length;
     const standing = franchiseSession.standings[champion.id];
-    const statKeys = ["eliminations", "assists", "zoneCaptures", "zoneDefenses", "interceptions", "distanceCarried"];
-    const mvpStats = { games: 0, ratingTotal: 0, ...Object.fromEntries(statKeys.map((key) => [key, 0])) };
+    const statKeys = ["eliminations", "assists", "zoneCaptures", "zoneDefenses", "interceptions", "distanceCarried", "decoysSuccessful", "decoysDenied", "networkCoverage"];
+    const mvpStats = { games: 0, ratingTotal: 0, coverageGames: 0, ...Object.fromEntries(statKeys.map((key) => [key, 0])) };
     let mvpTeamId = mvp?.teamId;
+    let mvpRole;
     playoffGames.forEach((game) => ["home", "away"].forEach((side) => {
       const line = (game.result.players?.[side] || []).find((player) => player.id === mvp?.playerId);
       if (!line) return;
       mvpTeamId ??= game[`${side}TeamId`];
+      mvpRole ??= line.role;
       mvpStats.games += 1;
       mvpStats.ratingTotal += line.rating || 0;
       statKeys.forEach((key) => { mvpStats[key] += line[key] || 0; });
+      if (line.networkCoverage > 0) mvpStats.coverageGames += 1;
     }));
     const mvpTeam = franchiseSession.teams[mvpTeamId];
     const mvpPlayer = mvpTeam?.roster.find((player) => player.id === mvp?.playerId);
-    const mvpMetrics = [["Games", mvpStats.games], ["Avg Rating", mvpStats.games ? (mvpStats.ratingTotal / mvpStats.games).toFixed(1) : "—"], ["Eliminations", mvpStats.eliminations], ["Assists", mvpStats.assists], ["Captures", mvpStats.zoneCaptures], ["Zone Defense", mvpStats.zoneDefenses], ["Interceptions", mvpStats.interceptions], ["Distance", mvpStats.distanceCarried]];
+    const mvpRoleMetrics = {
+      Bruiser: [["Eliminations", "eliminations"], ["Zone Defenses", "zoneDefenses"]],
+      Cannon: [["Eliminations", "eliminations"], ["Assists", "assists"]],
+      Runner: [["Captures", "zoneCaptures"], ["Interceptions", "interceptions"], ["Distance", "distanceCarried"]],
+      Visual: [["Decoys Successful", "decoysSuccessful"], ["Decoys Denied", "decoysDenied"], ["Avg Coverage", "networkCoverage"]],
+      Musical: [["Decoys Successful", "decoysSuccessful"], ["Decoys Denied", "decoysDenied"], ["Avg Coverage", "networkCoverage"]]
+    };
+    const mvpMetrics = [["Games", mvpStats.games], ["Avg Rating", mvpStats.games ? (mvpStats.ratingTotal / mvpStats.games).toFixed(1) : "—"], ...(mvpRoleMetrics[mvpPlayer?.primaryRole || mvpRole] || []).map(([label, key]) => [label, key === "networkCoverage" ? (mvpStats.coverageGames ? `${(mvpStats.networkCoverage / mvpStats.coverageGames).toFixed(1)}%` : "0%") : mvpStats[key]])];
     const championCard = `<article class="award-dossier"><img src="${teamLogo(champion.name)}" alt=""><div><span>League Champion</span><h2>${champion.name}</h2><strong>${champion.conference}</strong><p>Season ${franchiseSession.season} champions</p><dl><div><dt>Regular Season</dt><dd>${standing ? `${standing.wins}-${standing.losses}` : "—"}</dd></div><div><dt>Playoffs</dt><dd>${playoffWins}-${championGames.length - playoffWins}</dd></div></dl></div></article>`;
     const mvpCard = mvp ? `<article class="award-dossier"><img src="${playerImage(mvpPlayer)}" alt=""><div><span>Playoffs MVP</span><h2>${mvp.playerName}</h2><strong>${mvpTeam?.name || "League"}</strong><p>${mvpPlayer ? displayRole(mvpPlayer.primaryRole) : "Postseason honor"}</p><dl>${mvpMetrics.map(([label, value]) => `<div><dt>${label}</dt><dd>${value}</dd></div>`).join("")}</dl></div></article>` : "";
     document.querySelector("#awardsBoard").innerHTML = `<div class="award-dossiers">${championCard}${mvpCard}</div>`;
