@@ -468,10 +468,12 @@ function renderPlayoffs() {
 function renderAwards() {
   if (!franchiseSession) return;
   const postseason = Boolean(franchiseSession.playoffs?.complete);
-  const awards = postseason ? (franchiseSession.playoffs.awards || []) : (franchiseSession.seasonAwards || window.ProxyFranchise.calculateSeasonAwards(franchiseSession));
+  const needsAwardRefresh = !postseason && franchiseSession.complete && !franchiseSession.playoffs && franchiseSession.seasonAwardsVersion !== 4;
+  const awards = postseason ? (franchiseSession.playoffs.awards || []) : window.ProxyFranchise.refreshSeasonAwards(franchiseSession);
   if (!postseason && !selectedAwardType) selectedAwardType = "general-of-year";
   if (!postseason) {
     franchiseSession.seasonAwards = awards;
+    if (needsAwardRefresh) persistFranchiseState();
     document.querySelector("#awardsTitle").textContent = "Regular Season Awards";
     document.querySelector("#awardsPhaseLabel").textContent = "Before Playoffs";
     document.querySelector("#awardsCommand").innerHTML = `<span class="menu-kicker">The league recognizes</span><h2>Season ${franchiseSession.season} is archived.</h2><p>These honors are recorded before the postseason begins.</p><button data-awards-action="playoffs">Continue to Playoffs <span>→</span></button>`;
@@ -512,7 +514,7 @@ function renderAwards() {
     };
     const mvpMetrics = [["Games", mvpStats.games], ["Avg Rating", mvpStats.games ? (mvpStats.ratingTotal / mvpStats.games).toFixed(1) : "—"], ...(mvpRoleMetrics[mvpPlayer?.primaryRole || mvpRole] || []).map(([label, key]) => [label, key === "networkCoverage" ? (mvpStats.coverageGames ? `${(mvpStats.networkCoverage / mvpStats.coverageGames).toFixed(1)}%` : "0%") : mvpStats[key]])];
     const championCard = `<article class="award-dossier"><img src="${teamLogo(champion.name)}" alt=""><div><span>League Champion</span><h2>${champion.name}</h2><strong>${champion.conference}</strong><p>Season ${franchiseSession.season} champions</p><dl><div><dt>Regular Season</dt><dd>${standing ? `${standing.wins}-${standing.losses}` : "—"}</dd></div><div><dt>Playoffs</dt><dd>${playoffWins}-${championGames.length - playoffWins}</dd></div></dl></div></article>`;
-    const mvpCard = mvp ? `<article class="award-dossier"><img src="${playerImage(mvpPlayer)}" alt=""><div><span>Playoffs MVP</span><h2>${mvp.playerName}</h2><strong>${mvpTeam?.name || "League"}</strong><p>${mvpPlayer ? displayRole(mvpPlayer.primaryRole) : "Postseason honor"}</p><dl>${mvpMetrics.map(([label, value]) => `<div><dt>${label}</dt><dd>${value}</dd></div>`).join("")}</dl></div></article>` : "";
+    const mvpCard = mvp ? `<article class="award-dossier"><img src="${playerImage(mvpPlayer)}" alt=""><div><span>Playoffs MVP${mvpPlayer?.primaryRole || mvpRole ? ` // ${displayRole(mvpPlayer?.primaryRole || mvpRole)}` : ""}</span><h2>${mvp.playerName}</h2><strong>${mvpTeam?.name || "League"}</strong><dl>${mvpMetrics.map(([label, value]) => `<div><dt>${label}</dt><dd>${value}</dd></div>`).join("")}</dl></div></article>` : "";
     document.querySelector("#awardsBoard").innerHTML = `<div class="award-dossiers">${championCard}${mvpCard}</div>`;
     return;
   }
@@ -525,8 +527,8 @@ function renderAwards() {
     Bruiser: [["Eliminations", "eliminations"], ["Zone Defenses", "zoneDefenses"]],
     Cannon: [["Eliminations", "eliminations"], ["Assists", "assists"]],
     Runner: [["Captures", "zoneCaptures"], ["Distance", "distanceCarried"]],
-    Visual: [["Decoys Successful", "decoysSuccessful"], ["Coverage", "networkCoverage"]],
-    Musical: [["Decoys Denied", "decoysDenied"], ["Coverage", "networkCoverage"]]
+    Visual: [["Decoys Successful", "decoysSuccessful"], ["Decoys Denied", "decoysDenied"], ["Coverage", "networkCoverage"]],
+    Musical: [["Decoys Successful", "decoysSuccessful"], ["Decoys Denied", "decoysDenied"], ["Coverage", "networkCoverage"]]
   };
   const awardStats = {
     "season-distanceCarried": ["Distance", "distanceCarried"],
@@ -534,7 +536,8 @@ function renderAwards() {
     "season-assists": ["Assists", "assists"],
     "season-zoneCaptures": ["Captures", "zoneCaptures"],
     "season-zoneDefenses": ["Zone Defenses", "zoneDefenses"],
-    "season-interceptions": ["Interceptions", "interceptions"]
+    "season-interceptions": ["Interceptions", "interceptions"],
+    "season-decoys": ["Total Decoys", "decoysTotal"]
   };
   const awardMetrics = (award, record) => {
     if (award.type === "general-of-year" || ((award.type === "all-league-first" || award.type === "all-league-second") && (award.role || record?.primaryRole) === "General")) {
@@ -547,15 +550,17 @@ function renderAwards() {
     const stats = [...(roleMetrics[award.role || record?.primaryRole] || [])];
     const awardStat = awardStats[award.type];
     if (awardStat && !stats.some(([, key]) => key === awardStat[1])) stats.push(awardStat);
-    return [["Rating", average], ...stats.map(([label, key]) => [label, key === "networkCoverage" ? (totals?.coverageAppearances ? `${(totals.coverageTotal / totals.coverageAppearances).toFixed(1)}%` : "0%") : totals?.[key] ?? (awardStat?.[1] === key ? award.value : 0) ?? 0])];
+    return [["Rating", average], ...stats.map(([label, key]) => [label, key === "networkCoverage" ? (totals?.coverageAppearances ? `${(totals.coverageTotal / totals.coverageAppearances).toFixed(1)}%` : "0%") : key === "decoysTotal" ? (totals ? (totals.decoysSuccessful || 0) + (totals.decoysDenied || 0) : award.value || 0) : totals?.[key] ?? (awardStat?.[1] === key ? award.value : 0) ?? 0])];
   };
   const awardTitles = { "all-league-first": "1st Team All-EWSL", "all-league-second": "2nd Team All-EWSL" };
   const awardTitle = (award) => awardTitles[award.type] || award.title;
   const playerCard = (award) => {
     const team = teamForPlayer(award.playerId);
     const record = franchiseSession.playerRecords[award.playerId];
+    const player = team?.roster.find((member) => member.id === award.playerId);
+    const role = award.role || record?.primaryRole || player?.primaryRole;
     const teamStanding = team ? franchiseSession.standings[team.id] : null;
-    return `<article class="award-dossier"><img src="${playerImage(team?.roster.find((player) => player.id === award.playerId))}" alt=""><div><span>${awardTitle(award)}${award.role ? ` // ${displayRole(award.role)}` : ""}</span><h2>${award.playerName}</h2><strong>${team?.name || "League"}</strong><p>${teamStanding ? `Team record ${teamStanding.wins}-${teamStanding.losses}` : "Season honor"}</p><dl>${awardMetrics(award, record).map(([label, value]) => `<div><dt>${label}</dt><dd>${value}</dd></div>`).join("")}</dl></div></article>`;
+    return `<article class="award-dossier"><img src="${playerImage(player)}" alt=""><div><span>${awardTitle(award)}${role ? ` // ${displayRole(role)}` : ""}</span><h2>${award.playerName}</h2><strong>${team?.name || "League"}</strong><p>${teamStanding ? `Team record ${teamStanding.wins}-${teamStanding.losses}` : "Season honor"}</p><dl>${awardMetrics(award, record).map(([label, value]) => `<div><dt>${label}</dt><dd>${value}</dd></div>`).join("")}</dl></div></article>`;
   };
   const cards = `<div class="award-dossiers">${selected.map(playerCard).join("") || `<div class="records-empty"><strong>Award details unavailable.</strong></div>`}</div>`;
   document.querySelector("#awardsBoard").innerHTML = `<nav class="award-tabs">${awardTypes.map((award) => `<button class="award-tab ${award.type === selectedAwardType ? "active" : ""}" data-award-type="${award.type}">${awardTitle(award)}</button>`).join("")}</nav>${cards}`;
@@ -689,6 +694,7 @@ function persistFranchiseState() {
     leagueHistory: franchiseSession.leagueHistory,
     achievements: franchiseSession.achievements,
     seasonAwards: franchiseSession.seasonAwards,
+    seasonAwardsVersion: franchiseSession.seasonAwardsVersion,
     freeAgents: franchiseSession.freeAgents,
     transactions: franchiseSession.transactions,
     playoffs: franchiseSession.playoffs,
@@ -755,6 +761,7 @@ function initializeFranchiseSeason() {
       franchiseSession.leagueHistory = saved.leagueHistory || [];
       franchiseSession.achievements = saved.achievements || { unlocked: [] };
       franchiseSession.seasonAwards = saved.seasonAwards || null;
+      franchiseSession.seasonAwardsVersion = saved.seasonAwardsVersion || 0;
       franchiseSession.freeAgents = saved.freeAgents || franchiseSession.freeAgents;
       franchiseSession.transactions = saved.transactions || [];
       franchiseSession.playoffs = saved.playoffs || null;

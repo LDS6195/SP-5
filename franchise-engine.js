@@ -248,7 +248,7 @@
       const rating = Math.max(4, Math.min(10, 5.4 + quality * 2.75 + (won ? .45 : -.1) + (random() - .5) * 1.6 + standout));
       const output = .55 + (rating - 5) * .18;
       const scaled = (max) => Math.floor(random() * max * output);
-      const eliminations = ["Cannon", "Bruiser"].includes(role) ? scaled(8) : role === "Runner" ? (random() < .12 * output ? 1 : 0) : 0;
+      const eliminations = ["Cannon", "Bruiser"].includes(role) ? scaled(20) : role === "Runner" ? (random() < .12 * output ? 1 : 0) : 0;
       const isArtist = role === "Visual" || role === "Musical";
       return {
         id: player.id,
@@ -317,11 +317,11 @@
   }
 
   function emptyPlayerTotals() {
-    return { appearances: 0, wins: 0, losses: 0, ratingTotal: 0, eliminations: 0, assists: 0, zoneCaptures: 0, zoneDefenses: 0, interceptions: 0, distanceCarried: 0, decoysSuccessful: 0, decoysDenied: 0, coverageTotal: 0, coverageAppearances: 0, survived: 0, playerOfMatch: 0, playoffWins: 0, playoffLosses: 0, championships: 0 };
+    return { appearances: 0, wins: 0, losses: 0, ratingTotal: 0, minutesPlayed: 0, eliminations: 0, assists: 0, zoneCaptures: 0, zoneDefenses: 0, interceptions: 0, distanceCarried: 0, decoysSuccessful: 0, decoysDenied: 0, coverageTotal: 0, coverageAppearances: 0, survived: 0, playerOfMatch: 0, playoffWins: 0, playoffLosses: 0, championships: 0 };
   }
 
   function emptyGeneralTotals() {
-    return { starts: 0, wins: 0, losses: 0, ratingTotal: 0, teamEliminations: 0, survivalTotal: 0, zonesCaptured: 0, zoneHoldTime: 0, playoffWins: 0, playoffLosses: 0, championships: 0, zoneWins: 0, eliminationWins: 0 };
+    return { starts: 0, wins: 0, losses: 0, ratingTotal: 0, minutesPlayed: 0, teamEliminations: 0, survivalTotal: 0, zonesCaptured: 0, zoneHoldTime: 0, playoffWins: 0, playoffLosses: 0, championships: 0, zoneWins: 0, eliminationWins: 0 };
   }
 
   function getPlayerRecord(state, team, line) {
@@ -347,6 +347,7 @@
   }
 
   function addPlayerTotals(target, line, won, playoff) {
+    target.minutesPlayed = (target.minutesPlayed ?? target.appearances * 30) + (Number.isFinite(line.minutes) ? Math.max(0, line.minutes) : 30);
     target.appearances += 1;
     target[won ? "wins" : "losses"] += 1;
     target.ratingTotal += Number(line.rating) || 0;
@@ -357,6 +358,7 @@
   }
 
   function addGeneralTotals(target, line, result, side, won, playoff) {
+    target.minutesPlayed = (target.minutesPlayed ?? target.starts * 30) + (Number.isFinite(line.minutes) ? Math.max(0, line.minutes) : 30);
     target.starts += 1;
     target[won ? "wins" : "losses"] += 1;
     target.ratingTotal += Number(line.rating) || 0;
@@ -477,6 +479,7 @@
   function summarizePlayerTotals(totals) {
     return {
       ...totals,
+      decoysTotal: (totals.decoysSuccessful || 0) + (totals.decoysDenied || 0),
       averageRating: totals.appearances ? Number((totals.ratingTotal / totals.appearances).toFixed(1)) : 0,
       winPercentage: totals.appearances ? Number((totals.wins / totals.appearances * 100).toFixed(1)) : 0,
       survivalRate: totals.appearances ? Number((totals.survived / totals.appearances * 100).toFixed(1)) : 0,
@@ -513,7 +516,7 @@
       const source = scope === "career" ? record.generalCareer : record.seasons[seasonNumber]?.general;
       if (!source?.starts) return null;
       const totals = summarizeGeneralTotals(source);
-      return { id: record.id, name: record.name, primaryRole: record.primaryRole, ...totals };
+      return { id: record.id, name: record.name, primaryRole: record.primaryRole, teams: scope === "career" ? Object.values(record.seasons).flatMap((season) => Object.values(season.teams)) : Object.values(record.seasons[seasonNumber]?.teams || {}), ...totals };
     }).filter(Boolean).sort((first, second) => (second[stat] || 0) - (first[stat] || 0) || second.starts - first.starts);
   }
 
@@ -543,16 +546,44 @@
 
   function calculateSeasonAwards(state) {
     const awards = [];
-    const generals = generalLeaderboard(state, { scope: "season", stat: "averageRating" }).filter((record) => record.starts >= 8)
-      .sort((first, second) => (second.averageRating * .7 + second.winPercentage * .03) - (first.averageRating * .7 + first.winPercentage * .03));
-    const players = playerLeaderboard(state, { scope: "season", stat: "averageRating" }).filter((record) => record.primaryRole !== "General" && record.appearances >= 8)
-      .sort((first, second) => (second.averageRating * .75 + second.winPercentage * .025) - (first.averageRating * .75 + first.winPercentage * .025));
+    const roleStats = {
+      General: [["teamEliminations", .45], ["zonesCaptured", .35], ["survivalRate", .2]],
+      Cannon: [["eliminations", .65], ["assists", .35]],
+      Bruiser: [["eliminations", .55], ["zoneDefenses", .45]],
+      Runner: [["zoneCaptures", .45], ["distanceCarried", .35], ["interceptions", .2]],
+      Visual: [["decoysSuccessful", .35], ["decoysDenied", .35], ["networkCoverage", .3]],
+      Musical: [["decoysSuccessful", .35], ["decoysDenied", .35], ["networkCoverage", .3]]
+    };
+    const seasonGames = state.schedule.length || 16;
+    const minimumMinutes = seasonGames * 10;
+    const generals = generalLeaderboard(state, { scope: "season", stat: "averageRating" }).filter((record) => record.starts >= 8 && (record.minutesPlayed ?? record.starts * 30) >= minimumMinutes);
+    const players = playerLeaderboard(state, { scope: "season", stat: "averageRating" }).filter((record) => record.primaryRole !== "General" && record.appearances >= 8 && (record.minutesPlayed ?? record.appearances * 30) >= minimumMinutes);
+    const leadersByRole = Object.fromEntries(Object.entries(roleStats).map(([role, metrics]) => {
+      const candidates = role === "General" ? generals : players.filter((record) => record.primaryRole === role);
+      return [role, Object.fromEntries(metrics.map(([stat]) => [stat, Math.max(1, ...candidates.map((record) => record[stat] || 0))]))];
+    }));
+    const score = (record) => {
+      const games = record.primaryRole === "General" ? record.starts : record.appearances;
+      const usage = Math.min(1, games / seasonGames) * Math.min(1, (record.minutesPlayed ?? games * 30) / (games * 30));
+      const production = roleStats[record.primaryRole].reduce((sum, [stat, weight]) => sum + weight * (record[stat] || 0) / leadersByRole[record.primaryRole][stat], 0);
+      const teamWins = (record.teams || []).reduce((sum, team) => {
+        const standing = state.standings.find((entry) => entry.teamId === team.teamId);
+        return sum + (standing ? standing.wins / Math.max(1, standing.wins + standing.losses) : record.winPercentage / 100) * team.appearances / games;
+      }, 0);
+      const idHash = [...record.id].reduce((hash, character) => Math.imul(hash ^ character.charCodeAt(0), 16777619), 2166136261) >>> 0;
+      const voterVariation = (createRandom(state.seed + state.season * 97 + idHash)() - .5) * .04;
+      return production * .6 + (teamWins || record.winPercentage / 100) * .15 + Math.max(0, (record.averageRating - 4) / 6) * usage * .2 + usage * .05 + voterVariation;
+    };
+    const rankCandidates = (candidates) => candidates.sort((first, second) => score(second) - score(first) || (second.appearances || second.starts) - (first.appearances || first.starts));
+    rankCandidates(generals);
+    const playerOfYearScore = (record) => score(record) - (["Visual", "Musical"].includes(record.primaryRole) ? .035 : 0);
+    const playerOfYear = players.slice().sort((first, second) => playerOfYearScore(second) - playerOfYearScore(first) || second.appearances - first.appearances)[0];
     if (generals[0]) awards.push({ season: state.season, type: "general-of-year", title: "General of the Year", playerId: generals[0].id, playerName: generals[0].name });
-    if (players[0]) awards.push({ season: state.season, type: "player-of-year", title: "Player of the Year", playerId: players[0].id, playerName: players[0].name });
+    if (playerOfYear) awards.push({ season: state.season, type: "player-of-year", title: "Player of the Year", role: playerOfYear.primaryRole, playerId: playerOfYear.id, playerName: playerOfYear.name });
 
     const allLeagueCounts = { General: 1, Cannon: 2, Runner: 2, Bruiser: 2, Visual: 1, Musical: 1 };
     Object.entries(allLeagueCounts).forEach(([role, count]) => {
-      const rolePlayers = playerLeaderboard(state, { scope: "season", stat: "averageRating" }).filter((record) => record.primaryRole === role);
+      const rolePlayers = rankCandidates((role === "General" ? generals : players).filter((record) => record.primaryRole === role));
       rolePlayers.slice(0, count).forEach((record) => awards.push({ season: state.season, type: "all-league-first", title: "1st Team All-EWSL", role, playerId: record.id, playerName: record.name }));
       rolePlayers.slice(count, count * 2).forEach((record) => awards.push({ season: state.season, type: "all-league-second", title: "2nd Team All-EWSL", role, playerId: record.id, playerName: record.name }));
     });
@@ -561,17 +592,33 @@
     const improved = Object.values(state.playerRecords).map((record) => {
       const current = record.seasons[state.season]?.totals;
       const previous = record.seasons[previousSeason]?.totals;
-      if (!current || !previous || current.appearances < 8 || previous.appearances < 8) return null;
+      if (!current || !previous || current.appearances < 8 || previous.appearances < 8 || (current.minutesPlayed ?? current.appearances * 30) < minimumMinutes || (previous.minutesPlayed ?? previous.appearances * 30) < minimumMinutes) return null;
       return { record, improvement: summarizePlayerTotals(current).averageRating - summarizePlayerTotals(previous).averageRating };
     }).filter(Boolean).sort((first, second) => second.improvement - first.improvement)[0];
     if (improved?.improvement > 0) awards.push({ season: state.season, type: "most-improved", title: "Most Improved Player", playerId: improved.record.id, playerName: improved.record.name });
 
-    const statisticalAwards = { eliminations: "Elimination Leader", assists: "Assist Leader", zoneCaptures: "Zone Capture Leader", zoneDefenses: "Zone Defense Leader", interceptions: "Interception Leader", distanceCarried: "Distance Leader" };
+    const statisticalAwards = { eliminations: "Elimination Leader", assists: "Assist Leader", zoneCaptures: "Zone Capture Leader", zoneDefenses: "Zone Defense Leader", interceptions: "Interception Leader", distanceCarried: "Distance Leader", decoysTotal: "Decoy Leader" };
     Object.entries(statisticalAwards).forEach(([stat, title]) => {
       const leader = playerLeaderboard(state, { scope: "season", stat })[0];
-      if (leader && leader[stat] > 0) awards.push({ season: state.season, type: `season-${stat}`, title, stat, value: leader[stat], playerId: leader.id, playerName: leader.name });
+      if (leader && leader[stat] > 0) awards.push({ season: state.season, type: stat === "decoysTotal" ? "season-decoys" : `season-${stat}`, title, stat, value: leader[stat], playerId: leader.id, playerName: leader.name });
     });
     awards.forEach((award) => grantAward(state, award));
+    return awards;
+  }
+
+  function refreshSeasonAwards(state) {
+    if (!state.complete || state.playoffs || state.seasonAwardsVersion === 4) return state.seasonAwards || calculateSeasonAwards(state);
+    const previous = state.seasonAwards || [];
+    const awards = calculateSeasonAwards(state);
+    const retained = new Set(awards.map((award) => `${award.type}:${award.playerId}:${award.title}`));
+    previous.filter((award) => !retained.has(`${award.type}:${award.playerId}:${award.title}`)).forEach((award) => {
+      const record = state.playerRecords[award.playerId];
+      if (record) record.awards = record.awards.filter((entry) => entry.season !== state.season || entry.type !== award.type || entry.title !== award.title);
+      state.achievements.unlocked = state.achievements.unlocked.filter((entry) => entry.season !== state.season || entry.id !== award.type || entry.subjectId !== award.playerId);
+    });
+    state.seasonAwards = awards;
+    state.seasonAwardsVersion = 4;
+    evaluateAchievements(state);
     return awards;
   }
 
@@ -704,11 +751,12 @@
   function startPlayoffs(state) {
     if (!state.complete) throw new Error("Regular season must be complete before playoffs.");
     if (state.playoffs) return state.playoffs;
+    const regularSeasonAwards = refreshSeasonAwards(state);
     const seedsByConference = {};
     ["Americas", "Eurasia-Africa"].forEach((conference) => {
       seedsByConference[conference] = standingsFor(state, conference).slice(0, 6).map((record, index) => ({ teamId: record.teamId, seed: index + 1 }));
     });
-    state.playoffs = { complete: false, roundIndex: 0, round: "Wild Card", seedsByConference, games: [], pendingGames: [], conferenceChampions: [], regularSeasonAwards: calculateSeasonAwards(state), awards: [] };
+    state.playoffs = { complete: false, roundIndex: 0, round: "Wild Card", seedsByConference, games: [], pendingGames: [], conferenceChampions: [], regularSeasonAwards, awards: [] };
     ["Americas", "Eurasia-Africa"].forEach((conference) => {
       const seeds = seedsByConference[conference];
       state.playoffs.pendingGames.push(playoffGame(state, seeds[2].teamId, seeds[5].teamId, "Wild Card", conference));
@@ -1011,6 +1059,8 @@
     state.standings = createStandings(state.teams);
     state.complete = false;
     state.playoffs = null;
+    state.seasonAwards = null;
+    state.seasonAwardsVersion = 0;
     const summary = { season: state.season, formChanges: state.offseason.formChanges, renewal: { protections: state.offseason.protections, picks: state.offseason.picks, freeAgents: state.freeAgents.length } };
     state.offseason = null;
     return summary;
@@ -1022,5 +1072,5 @@
     return { ...result, renewal };
   }
 
-  return { createLeague, generateSchedule, simulateGame, playWeek, playUntilWeek, userGameForWeek, standingsFor, playerLeaderboard, generalLeaderboard, recordHolders, calculateSeasonAwards, archiveSeason, evaluateAchievements, startPlayoffs, playPlayoffRound, playoffGameForUser, runPlayoffs, repairPlayoffsMvp, ensureGameRecords, startOffseason, recommendedProtections, validProtections, submitProtections, renewalCurrentPick, renewalAvailable, renewalUserPick, renewalCpuStep, renewalAutoPick, simulateRenewal, runRenewalDraft, beginNextSeason, advanceSeason, swapFreeAgent, ACHIEVEMENTS };
+  return { createLeague, generateSchedule, simulateGame, playWeek, playUntilWeek, userGameForWeek, standingsFor, playerLeaderboard, generalLeaderboard, recordHolders, calculateSeasonAwards, refreshSeasonAwards, archiveSeason, evaluateAchievements, startPlayoffs, playPlayoffRound, playoffGameForUser, runPlayoffs, repairPlayoffsMvp, ensureGameRecords, startOffseason, recommendedProtections, validProtections, submitProtections, renewalCurrentPick, renewalAvailable, renewalUserPick, renewalCpuStep, renewalAutoPick, simulateRenewal, runRenewalDraft, beginNextSeason, advanceSeason, swapFreeAgent, ACHIEVEMENTS };
 });
