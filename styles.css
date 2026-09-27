@@ -754,6 +754,62 @@ body[data-theme="broadcast"] .prospect-number { font-size: 110px; }
 .awards-command p { color: #d8cbb4; line-height: 1.6; }
 .awards-command button { width: 100%; min-height: 52px; margin-top: 22px; padding: 0 16px; color: #25180f; background: #c7a45d; font-weight: 800; text-transform: uppercase; }
 .awards-champion-logo { width: 150px; height: 150px; margin: 25px auto 12px; display: block; object-fit: contain; }
+.season-recap-screen { min-height: 100svh; overflow-y: auto; color: #f0e4ce; background: #24150e; }
+.season-recap-header { min-height: 86px; display: grid; grid-template-columns: 52px 1fr auto; align-items: center; gap: 16px; padding: 12px clamp(16px, 3vw, 42px); background: #342117; border-bottom: 2px solid #c7a45d; }
+.season-recap-header h1 { margin: 4px 0 0; font: italic 800 34px/1 var(--condensed); text-transform: uppercase; }
+.season-recap-header > span { color: #efd28f; font: 11px var(--mono); text-transform: uppercase; }
+.season-recap-layout { max-width: 1150px; margin: 0 auto; padding: 26px 24px 52px; }
+.season-recap-card { color: #2b2119; background: #f2e8d4; border: 1px solid #c0a987; box-shadow: 0 18px 44px rgba(0,0,0,.3); }
+.recap-banner { min-height: 52px; display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 8px 28px; color: #f4e7cf; background: #203a30; text-transform: uppercase; }
+.recap-banner.champion { background: #8f2f24; }.recap-banner span { font: 9px var(--mono); }.recap-banner strong { font: italic 800 25px var(--condensed); }
+.recap-identity { display: grid; grid-template-columns: 88px minmax(0, 1fr) auto; align-items: center; gap: 20px; padding: 20px 28px; }
+.recap-identity img { width: 84px; height: 84px; object-fit: contain; }.recap-identity div { min-width: 0; }
+.recap-identity div > span { color: #8f2f24; font: 9px var(--mono); text-transform: uppercase; }
+.recap-identity h2 { margin: 5px 0; font: italic 800 36px/1 var(--condensed); text-transform: uppercase; overflow-wrap: anywhere; }
+.recap-identity p { margin: 0; color: #635442; font-size: 12px; }.recap-identity > strong { color: #8f2f24; font: 800 40px/.9 var(--condensed); white-space: nowrap; }
+.recap-identity > strong small { display: block; margin-top: 7px; color: #625441; font: 9px var(--mono); text-align: right; text-transform: uppercase; }
+.recap-team-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 0; background: #d8c9ae; border-block: 1px solid #b29c79; }
+.recap-team-stats div { min-width: 0; padding: 14px 22px; border-right: 1px solid #af9979; }.recap-team-stats div:last-child { border-right: 0; }
+.recap-team-stats dt { color: #6a5641; font: 9px var(--mono); text-transform: uppercase; }.recap-team-stats dd { margin: 5px 0 0; color: #8f2f24; font: 800 29px/1 var(--condensed); }
+.recap-roster-heading { display: flex; justify-content: space-between; gap: 12px; padding: 18px 28px 12px; font: 9px var(--mono); text-transform: uppercase; }.recap-roster-heading strong { color: #8f2f24; }
+.recap-roster { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid #c7b493; }
+.recap-player { min-width: 0; min-height: 116px; display: flex; gap: 11px; padding: 12px; border-right: 1px solid #c7b493; border-bottom: 1px solid #c7b493; }
+.recap-player:nth-child(3n) { border-right: 0; }.recap-player.honored { background: #eee0c4; box-shadow: inset 3px 0 #8f2f24; }
+.recap-player > img { flex: 0 0 69px; width: 69px; height: 90px; object-fit: cover; object-position: center 20%; background: #d2c3a9; }
+.recap-player-info { min-width: 0; }.recap-player-info > span { color: #8f2f24; font: 8px var(--mono); text-transform: uppercase; }
+.recap-player-info > strong { display: block; margin: 3px 0 7px; font: 700 17px/1 var(--condensed); text-transform: uppercase; overflow-wrap: anywhere; }
+.recap-player-numbers { display: flex; flex-wrap: wrap; gap: 4px 10px; color: #675847; font: 8px var(--mono); text-transform: uppercase; }.recap-player-numbers b { color: #2b2119; }
+.recap-honors { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 7px; }.recap-honors em { padding: 3px 5px; color: #fff1db; background: #8f2f24; font: normal 8px var(--mono); text-transform: uppercase; }
+.season-recap-card footer { display: flex; justify-content: space-between; gap: 12px; padding: 12px 28px; background: #203a30; color: #e8dabd; font: 9px var(--mono); letter-spacing: 0; }.season-recap-card footer strong { color: #f3d688; }
+.season-recap-share { margin: 25px auto 0; text-align: center; }
+.season-recap-share > span { color: #d8c9ab; font: 10px var(--mono); text-transform: uppercase; }
+.season-recap-caption { display: block; margin: 15px 0 6px; color: #c7b99f; font: 9px var(--mono); text-transform: uppercase; }
+#seasonRecapCaption { width: min(100%, 620px); min-height: 72px; display: block; margin: 0 auto; padding: 12px 14px; resize: vertical; color: #f2e8d4; background: #203a30; border: 1px solid #84988b; font: 11px/1.5 var(--mono); }
+.season-recap-share nav { width: min(100%, 420px); display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; margin: 14px auto 0; }
+.season-recap-share nav a, .season-recap-share nav button { min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 7px; padding: 0; color: #e9dec7; background: transparent; border: 0; text-decoration: none; cursor: pointer; }
+.season-recap-share nav b { width: 50px; height: 50px; display: grid; place-items: center; color: #203a30; background: #f2e8d4; border: 2px solid #c7a45d; border-radius: 50%; font: 800 18px var(--condensed); }
+.season-recap-share nav a:hover b, .season-recap-share nav button:hover b, .season-recap-share nav a:focus-visible b, .season-recap-share nav button:focus-visible b { color: #f2e8d4; background: #8f2f24; }
+.season-recap-share nav small { font: 9px var(--mono); }
+.season-recap-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 20px; }
+.season-recap-actions button { min-height: 46px; padding: 0 18px; color: #f2e8d4; background: #203a30; border: 1px solid #84988b; font: 700 11px var(--sans); }
+.season-recap-actions button[data-recap-action="continue"] { color: #28180e; background: #c7a45d; border-color: #c7a45d; }
+.season-recap-actions button:disabled { opacity: .55; cursor: wait; }.season-recap-feedback { min-height: 20px; margin: 12px 0 0; color: #dbcdb1; font-size: 11px; text-align: center; }
+@media (max-width: 760px) {
+  .season-recap-header { grid-template-columns: 42px minmax(0, 1fr); gap: 10px; }.season-recap-header h1 { font-size: 28px; }.season-recap-header > span { grid-column: 2; }
+  .season-recap-layout { padding: 12px 10px 38px; }
+  .recap-banner { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 10px; padding: 10px 14px; }.recap-banner span { font-size: 8px; }.recap-banner span:last-child { grid-column: 2; grid-row: 1; }.recap-banner strong { grid-column: 1 / -1; font-size: 19px; }
+  .recap-identity { grid-template-columns: 60px minmax(0, 1fr); gap: 12px; padding: 14px; }.recap-identity img { width: 58px; height: 58px; }
+  .recap-identity h2 { font-size: 25px; }.recap-identity p { font-size: 10px; }.recap-identity > strong { grid-column: 1 / -1; padding-top: 7px; border-top: 1px solid #c7b493; font-size: 28px; }
+  .recap-identity > strong small { display: inline; margin-left: 7px; }
+  .recap-team-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }.recap-team-stats div { padding: 11px 14px; border-bottom: 1px solid #af9979; }.recap-team-stats div:nth-child(2n) { border-right: 0; }.recap-team-stats div:last-child { grid-column: 1 / -1; border-bottom: 0; }.recap-team-stats dd { font-size: 24px; }
+  .recap-roster-heading { padding: 15px 14px 10px; }.recap-roster { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .recap-player { min-height: 126px; gap: 6px; padding: 8px 5px; }.recap-player:nth-child(3n) { border-right: 1px solid #c7b493; }.recap-player:nth-child(2n) { border-right: 0; }
+  .recap-player > img { flex-basis: 48px; width: 48px; height: 68px; }.recap-player-info > strong { font-size: 14px; }.recap-player-info > span { font-size: 7px; }
+  .recap-player-numbers { gap: 4px 6px; font-size: 7px; }.recap-honors em { font-size: 7px; }
+  .season-recap-card footer { padding: 10px 14px; font-size: 8px; }
+  .season-recap-share nav { gap: 3px; }.season-recap-share nav b { width: 44px; height: 44px; font-size: 16px; }.season-recap-share nav small { font-size: 8px; }
+  .season-recap-actions { display: grid; grid-template-columns: 1fr 1fr; }.season-recap-actions button { padding: 0 8px; }.season-recap-actions button[data-recap-action="continue"] { grid-column: 1 / -1; }
+}
 .progression-screen { min-height: 100vh; color: #f0e4ce; background: #24150e; }
 .progression-header { min-height: 92px; display: grid; grid-template-columns: 52px 1fr auto; align-items: center; gap: 16px; padding: 12px 28px; background: #342117; border-bottom: 1px solid #76533b; }
 .progression-header h1 { margin: 5px 0 0; font: italic 800 42px/.9 var(--condensed); text-transform: uppercase; }

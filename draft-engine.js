@@ -46,13 +46,14 @@
   function createDraft(players, options = {}) {
     const userTeamIndex = options.userTeamIndex ?? 7;
     const rounds = options.rounds ?? 12;
+    const seed = options.snapshot?.seed ?? options.seed ?? null;
     const random = createRandom(options.snapshot?.randomState ?? options.seed ?? 3000);
     const teams = TEAM_DEFINITIONS.map(([name, conference, homeField], index) => ({
       id: index,
       name,
       conference,
       homeField,
-      strategy: STRATEGIES[index % STRATEGIES.length],
+      strategy: options.snapshot?.strategies?.[index] || (options.snapshot ? STRATEGIES[index % STRATEGIES.length] : STRATEGIES[Math.floor(random() * STRATEGIES.length)]),
       roster: []
     }));
     const teamOrder = options.snapshot?.draftOrder || Array.from({ length: teams.length }, (_, index) => index);
@@ -63,6 +64,7 @@
       }
     }
     const state = {
+      seed,
       teams,
       players,
       availableIds: new Set(players.map((player) => player.id)),
@@ -112,7 +114,7 @@
         counter: { General: 3, Cannon: 3 }, balanced: {}
       }[team.strategy][player.primaryRole] || 0;
       const urgency = need && totalHoles >= roundsLeft ? 25 : need ? 10 : -9;
-      return player.overall * .7 + versatility * .12 + urgency + strategyBonus + (random() - .5) * 5;
+      return player.overall * .7 + versatility * .12 + urgency + strategyBonus + (random() - .5) * 9;
     }
 
     function canPick(team, player) {
@@ -133,7 +135,14 @@
         return available.filter((player) => player.primaryRole === role).sort((a, b) => b.overall - a.overall).slice(0, 16);
       });
       const candidates = [...new Map([...eliteFloor, ...needed].map((player) => [player.id, player])).values()].filter((player) => canPick(team, player));
-      return candidates.map((player) => ({ player, value: playerValue(player, team) })).reduce((best, entry) => entry.value > best.value ? entry : best).player;
+      const ranked = candidates.map((player) => ({ player, value: playerValue(player, team) })).sort((first, second) => second.value - first.value).slice(0, 5);
+      const weights = ranked.map((entry) => Math.exp((entry.value - ranked[0].value) / 2.5));
+      let draw = random() * weights.reduce((sum, weight) => sum + weight, 0);
+      for (let index = 0; index < ranked.length; index += 1) {
+        draw -= weights[index];
+        if (draw <= 0) return ranked[index].player;
+      }
+      return ranked[0].player;
     }
 
     function commitPick(playerId) {
@@ -184,6 +193,8 @@
 
     function snapshot() {
       return {
+        seed: state.seed,
+        strategies: state.teams.map((team) => team.strategy),
         userTeamIndex: state.userTeamIndex,
         pickIndex: state.pickIndex,
         history: state.history.slice(),

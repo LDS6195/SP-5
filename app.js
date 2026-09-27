@@ -86,6 +86,7 @@ const seasonScreen = document.querySelector("#seasonScreen");
 const recordsScreen = document.querySelector("#recordsScreen");
 const playoffsScreen = document.querySelector("#playoffsScreen");
 const awardsScreen = document.querySelector("#awardsScreen");
+const seasonRecapScreen = document.querySelector("#seasonRecapScreen");
 const progressionScreen = document.querySelector("#progressionScreen");
 const offseasonScreen = document.querySelector("#offseasonScreen");
 const squadScreen = document.querySelector("#squadScreen");
@@ -174,7 +175,7 @@ try {
 }
 
 function showGameScreen(screen) {
-  [mainMenu, loadScreen, introScreen, rulesScreen, franchiseScreen, seasonScreen, recordsScreen, playoffsScreen, awardsScreen, progressionScreen, offseasonScreen, squadScreen, strategyScreen, matchScreen, gameInterface].forEach((item) => {
+  [mainMenu, loadScreen, introScreen, rulesScreen, franchiseScreen, seasonScreen, recordsScreen, playoffsScreen, awardsScreen, seasonRecapScreen, progressionScreen, offseasonScreen, squadScreen, strategyScreen, matchScreen, gameInterface].forEach((item) => {
     item.hidden = item !== screen;
   });
   window.scrollTo(0, 0);
@@ -186,6 +187,7 @@ function showGameScreen(screen) {
   if (screen === recordsScreen) renderRecords();
   if (screen === playoffsScreen) renderPlayoffs();
   if (screen === awardsScreen) { selectedAwardType = null; renderAwards(); }
+  if (screen === seasonRecapScreen) renderSeasonRecap();
   if (screen === progressionScreen) renderProgression();
   if (screen === offseasonScreen) renderOffseason();
   if (screen === squadScreen) renderSquadRoom();
@@ -195,12 +197,13 @@ function showGameScreen(screen) {
   if ([seasonScreen, recordsScreen, squadScreen, strategyScreen, matchScreen].includes(screen) && draftSession.state.complete) currentStage = "season";
   if (screen === playoffsScreen) currentStage = "playoffs";
   if (screen === awardsScreen) currentStage = "awards";
+  if (screen === seasonRecapScreen) currentStage = "recap";
   if (screen === progressionScreen) currentStage = "progression";
   if (screen === offseasonScreen) currentStage = "offseason";
 }
 
 function createGameSnapshot(stage = currentStage) {
-  const savedStage = franchiseSession?.offseason ? "offseason" : franchiseSession?.playoffs ? "playoffs" : stage;
+  const savedStage = franchiseSession?.offseason ? "offseason" : stage === "recap" ? "recap" : franchiseSession?.playoffs ? "playoffs" : stage;
   return {
     gameVersion: "0.1.0-alpha",
     savedAt: new Date().toISOString(),
@@ -254,7 +257,7 @@ async function restoreGame(snapshot) {
   }
   if (franchiseSession) syncUserSchedule();
   updateDraftUI();
-  const destination = snapshot.stage === "draft" ? gameInterface : snapshot.stage === "playoffs" ? playoffsScreen : snapshot.stage === "offseason" ? offseasonScreen : seasonScreen;
+  const destination = snapshot.stage === "draft" ? gameInterface : snapshot.stage === "recap" && franchiseSession?.playoffs?.complete ? seasonRecapScreen : snapshot.stage === "playoffs" ? playoffsScreen : snapshot.stage === "offseason" ? offseasonScreen : seasonScreen;
   showGameScreen(destination);
   if (repairedPlayoffsMvp) persistFranchiseState();
 }
@@ -308,7 +311,8 @@ function renderFranchiseSelect() {
 }
 
 function applyFranchiseSelection() {
-  draftSession = window.ProxyDraft.createDraft(window.PROXY_PLAYER_POOL, { userTeamIndex: selectedFranchiseIndex, seed: 3000, randomizeDraftOrder: true, deferCpu: true });
+  const seed = globalThis.crypto?.getRandomValues ? globalThis.crypto.getRandomValues(new Uint32Array(1))[0] : Math.floor(Math.random() * 4294967296);
+  draftSession = window.ProxyDraft.createDraft(window.PROXY_PLAYER_POOL, { userTeamIndex: selectedFranchiseIndex, seed, randomizeDraftOrder: true, deferCpu: true });
   userDraftTeam = draftSession.state.teams[selectedFranchiseIndex];
   selectedProspectId = null;
   startingFreshFranchise = true;
@@ -566,6 +570,103 @@ function renderAwards() {
   document.querySelector("#awardsBoard").innerHTML = `<nav class="award-tabs">${awardTypes.map((award) => `<button class="award-tab ${award.type === selectedAwardType ? "active" : ""}" data-award-type="${award.type}">${awardTitle(award)}</button>`).join("")}</nav>${cards}`;
 }
 
+function renderSeasonRecap() {
+  const state = franchiseSession;
+  if (!state?.playoffs?.complete) return;
+  const team = state.teams[state.userTeamId];
+  const standing = state.standings[team.id];
+  const year = 2999 + state.season;
+  const games = state.schedule.flatMap((week) => week.games).filter((game) => game.result && (game.homeTeamId === team.id || game.awayTeamId === team.id));
+  const totals = games.reduce((stats, game) => {
+    const side = game.homeTeamId === team.id ? "home" : "away";
+    const opponentUnits = game.result[side === "home" ? "awayUnits" : "homeUnits"];
+    stats.eliminations += Math.max(0, 100 - (opponentUnits ?? 100));
+    stats.unitsSurvived += game.result[`${side}Units`] || 0;
+    stats.zonePoints += game.result[`${side}Score`] || 0;
+    return stats;
+  }, { eliminations: 0, unitsSurvived: 0, zonePoints: 0 });
+  const qualified = Object.values(state.playoffs.seedsByConference || {}).flat().some((seed) => seed.teamId === team.id);
+  const playoffGames = state.playoffs.games.filter((game) => game.homeTeamId === team.id || game.awayTeamId === team.id);
+  const playoffWins = playoffGames.filter((game) => (game.result.winner === "home" ? game.homeTeamId : game.awayTeamId) === team.id).length;
+  const champion = state.playoffs.championTeamId === team.id;
+  const finalRound = playoffGames.at(-1)?.round;
+  const finish = champion ? "League Champions" : !qualified ? "Missed Playoffs" : finalRound === "League Championship" ? "League Finalists" : `${finalRound || "Playoffs"} Exit`;
+  const playerStats = (player) => {
+    const record = state.playerRecords[player.id];
+    const season = record?.seasons[state.season];
+    const stats = season?.totals;
+    const general = season?.general;
+    const entries = {
+      General: [["Team ELIM", general?.teamEliminations || 0], ["Survival", general?.starts ? `${(general.survivalTotal / general.starts).toFixed(1)}%` : "0%"], ["Zones", general?.zonesCaptured || 0]],
+      Cannon: [["ELIM", stats?.eliminations || 0], ["AST", stats?.assists || 0]],
+      Bruiser: [["ELIM", stats?.eliminations || 0], ["DEF", stats?.zoneDefenses || 0]],
+      Runner: [["CAP", stats?.zoneCaptures || 0], ["INT", stats?.interceptions || 0], ["Carry", Math.round(stats?.distanceCarried || 0).toLocaleString()]],
+      Visual: [["Decoys +", stats?.decoysSuccessful || 0], ["Decoys -", stats?.decoysDenied || 0], ["Coverage", stats?.coverageAppearances ? `${(stats.coverageTotal / stats.coverageAppearances).toFixed(1)}%` : "0%"]],
+      Musical: [["Decoys +", stats?.decoysSuccessful || 0], ["Decoys -", stats?.decoysDenied || 0], ["Coverage", stats?.coverageAppearances ? `${(stats.coverageTotal / stats.coverageAppearances).toFixed(1)}%` : "0%"]]
+    };
+    const gamesPlayed = player.primaryRole === "General" ? general?.starts || 0 : stats?.appearances || 0;
+    const rating = gamesPlayed ? ((player.primaryRole === "General" ? general?.ratingTotal : stats?.ratingTotal) / gamesPlayed).toFixed(1) : "—";
+    const honors = (record?.awards || []).filter((award) => award.season === state.season && award.type !== "league-champion").map((award) => award.title);
+    return `<div class="recap-player ${honors.length ? "honored" : ""}"><img src="${playerImage(player)}" alt="" loading="eager" referrerpolicy="no-referrer"><div class="recap-player-info"><span>${displayRole(player.primaryRole)}</span><strong>${player.name}</strong><div class="recap-player-numbers"><span><b>${gamesPlayed}</b> GP</span><span><b>${rating}</b> RTG</span>${(entries[player.primaryRole] || []).map(([label, value]) => `<span><b>${value}</b> ${label}</span>`).join("")}</div>${honors.length ? `<div class="recap-honors">${honors.map((honor) => `<em>${honor}</em>`).join("")}</div>` : ""}</div></div>`;
+  };
+  document.querySelector("#seasonRecapYear").textContent = `Year ${year}`;
+  document.querySelector("#seasonRecapCard").innerHTML = `<div class="recap-banner ${champion ? "champion" : ""}"><span>EWSL // Season ${state.season.toString().padStart(2, "0")}</span><strong>${champion ? "League Champions" : "Season Report"}</strong><span>Year ${year}</span></div><div class="recap-identity"><img src="${teamLogo(team.name)}" alt=""><div><span>${team.conference} Conference</span><h2>${team.name}</h2><p>${finish} // ${playoffGames.length ? `${playoffWins}-${playoffGames.length - playoffWins} in playoffs` : "Regular season"}</p></div><strong>${standing.wins}-${standing.losses}<small>Record</small></strong></div><dl class="recap-team-stats"><div><dt>Team Eliminations</dt><dd>${totals.eliminations.toLocaleString()}</dd></div><div><dt>Survival Rate</dt><dd>${games.length ? `${(totals.unitsSurvived / games.length).toFixed(1)}%` : "—"}</dd></div><div><dt>Zone Points</dt><dd>${totals.zonePoints.toLocaleString()}</dd></div></dl><div class="recap-roster-heading"><span>Full Season // Roster</span><strong>${team.roster.length} Players</strong></div><div class="recap-roster">${team.roster.map(playerStats).join("")}</div><footer><span>EARTH WAR SIMULATION LEAGUE</span><strong>earthwar3k.com</strong></footer>`;
+  const caption = seasonRecapCaption();
+  const gameUrl = "https://earthwar3k.com/";
+  document.querySelector('[data-recap-platform="x"]').href = `https://twitter.com/intent/tweet?text=${encodeURIComponent(caption)}`;
+  document.querySelector('[data-recap-platform="facebook"]').href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(gameUrl)}&quote=${encodeURIComponent(caption)}`;
+  document.querySelector('[data-recap-platform="linkedin"]').href = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(gameUrl)}`;
+  document.querySelector('[data-recap-platform="sms"]').href = `sms:?body=${encodeURIComponent(caption)}`;
+  document.querySelector("#seasonRecapCaption").value = caption;
+  document.querySelector("#seasonRecapFeedback").textContent = "";
+}
+
+function seasonRecapCaption() {
+  const state = franchiseSession;
+  const team = state.teams[state.userTeamId];
+  const standing = state.standings[team.id];
+  const champion = state.playoffs.championTeamId === team.id;
+  const qualified = Object.values(state.playoffs.seedsByConference || {}).flat().some((seed) => seed.teamId === team.id);
+  const games = state.playoffs.games.filter((game) => game.homeTeamId === team.id || game.awayTeamId === team.id);
+  const finish = champion ? " and won the league championship" : !qualified ? "" : games.at(-1)?.round === "League Championship" ? " and reached the league final" : " and made the playoffs";
+  return `My ${team.name} finished ${standing.wins}-${standing.losses} in EWSL Year ${2999 + state.season}${finish}. Think you can top it? Play at https://earthwar3k.com/`;
+}
+
+async function seasonRecapImage() {
+  if (!window.htmlToImage) throw new Error("Image export is unavailable. Screenshot the report instead.");
+  const card = document.querySelector("#seasonRecapCard");
+  await document.fonts.ready;
+  const blob = await window.htmlToImage.toBlob(card, { pixelRatio: 2, backgroundColor: "#f2e8d4", cacheBust: true, imagePlaceholder: blankPlayerSilhouette });
+  if (!blob) throw new Error("The report image could not be created. Screenshot the card instead.");
+  return new File([blob], `earthwar3k-${teamSlug(userDraftTeam.name)}-${2999 + franchiseSession.season}.png`, { type: "image/png" });
+}
+
+function downloadSeasonRecap(file) {
+  const url = URL.createObjectURL(file);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = file.name;
+  document.body.append(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+async function copySeasonRecapCaption() {
+  const caption = seasonRecapCaption();
+  try {
+    await navigator.clipboard.writeText(caption);
+  } catch {
+    const field = document.createElement("textarea");
+    field.value = caption;
+    document.body.append(field);
+    field.select();
+    const copied = document.execCommand("copy");
+    field.remove();
+    if (!copied) throw new Error("Could not copy the caption.");
+  }
+}
+
 function renderProgression() {
   if (!franchiseSession?.offseason) return;
   const changes = new Map(franchiseSession.offseason.formChanges.map((change) => [change.playerId, change]));
@@ -688,6 +789,7 @@ function persistFranchiseState() {
   try {
     localStorage.setItem(storageKey, JSON.stringify({
     season: franchiseSession.season,
+    seed: franchiseSession.seed,
     currentWeek: franchiseSession.currentWeek,
     standings: franchiseSession.standings,
     playerRecords: franchiseSession.playerRecords,
@@ -745,13 +847,14 @@ function syncUserSchedule() {
 }
 
 function initializeFranchiseSeason() {
-  franchiseSession = window.ProxyFranchise.createLeague(draftSession.state.teams, userDraftTeam.id, { season: 1, seed: 3000 + selectedFranchiseIndex * 7919, freeAgents: draftSession.availablePlayers() });
+  franchiseSession = window.ProxyFranchise.createLeague(draftSession.state.teams, userDraftTeam.id, { season: 1, seed: draftSession.state.seed ?? 3000 + selectedFranchiseIndex * 7919, freeAgents: draftSession.availablePlayers() });
   try {
     const saved = startingFreshFranchise ? null : JSON.parse(localStorage.getItem(`${seasonStorageKey}-${userDraftTeam.id}`) || "null");
     startingFreshFranchise = false;
     if (saved?.currentWeek && Array.isArray(saved.standings) && Array.isArray(saved.results)) {
       if (saved.teams) franchiseSession.teams = saved.teams;
       if (saved.season) franchiseSession.season = saved.season;
+      if (Number.isInteger(saved.seed)) franchiseSession.seed = saved.seed;
       userDraftTeam = franchiseSession.teams[franchiseSession.userTeamId];
       franchiseSession.schedule = window.ProxyFranchise.generateSchedule(franchiseSession.teams, franchiseSession.season);
       franchiseSession.currentWeek = saved.currentWeek;
@@ -1321,7 +1424,7 @@ document.querySelector("#postseasonControl").addEventListener("click", (event) =
     } catch (error) { showToast(`Playoff startup failed: ${error.message}`); }
     return;
   }
-  advanceOffseason();
+  if (action === "advance" && franchiseSession.playoffs?.complete) { showGameScreen(seasonRecapScreen); persistFranchiseState(); }
 });
 document.querySelector("#playoffCommand").addEventListener("click", (event) => {
   const action = event.target.closest("[data-playoff-action]")?.dataset.playoffAction;
@@ -1363,6 +1466,51 @@ document.querySelector("#championshipModal").addEventListener("click", (event) =
 });
 document.querySelector("#offseasonBackButton").addEventListener("click", () => showGameScreen(playoffsScreen));
 document.querySelector("#awardsBackButton").addEventListener("click", () => showGameScreen(seasonScreen));
+document.querySelector("#seasonRecapBackButton").addEventListener("click", () => showGameScreen(awardsScreen));
+document.querySelector("#seasonRecapScreen").addEventListener("click", async (event) => {
+  const platform = event.target.closest("[data-recap-platform]")?.dataset.recapPlatform;
+  if (platform === "facebook" || platform === "linkedin") {
+    const feedback = document.querySelector("#seasonRecapFeedback");
+    feedback.textContent = "Preparing caption and report image...";
+    Promise.allSettled([copySeasonRecapCaption(), seasonRecapImage().then(downloadSeasonRecap)]).then(([caption, image]) => {
+      feedback.textContent = caption.status === "fulfilled" && image.status === "fulfilled" ? "Caption copied and image downloaded. Paste both into your post." : caption.status === "fulfilled" ? "Caption copied. Use Download Image to attach the report." : image.status === "fulfilled" ? "Image downloaded. Copy the caption above for your post." : "Copy the caption and screenshot the report for your post.";
+    });
+    return;
+  }
+  if (platform === "x") { document.querySelector("#seasonRecapFeedback").textContent = "X draft opened. Attach your report image to the post."; return; }
+  if (platform === "sms") return;
+  const button = event.target.closest("[data-recap-action]");
+  if (!button || button.disabled) return;
+  const action = button.dataset.recapAction;
+  if (action === "continue") { advanceOffseason(); return; }
+  const feedback = document.querySelector("#seasonRecapFeedback");
+  button.disabled = true;
+  try {
+    if (action === "caption") {
+      await copySeasonRecapCaption();
+      feedback.textContent = "Season caption copied.";
+      return;
+    }
+    const nativeImageShare = action === "instagram" && navigator.share && navigator.canShare?.({ files: [new File(["report"], "report.png", { type: "image/png" })] });
+    if (action === "instagram" && !nativeImageShare) window.open("https://www.instagram.com/", "_blank", "noopener,noreferrer");
+    feedback.textContent = "Preparing report image...";
+    const file = await seasonRecapImage();
+    if (nativeImageShare) {
+      await navigator.share({ title: `${userDraftTeam.name} // Year ${2999 + franchiseSession.season}`, text: seasonRecapCaption(), files: [file] });
+      feedback.textContent = "Report shared.";
+    } else {
+      downloadSeasonRecap(file);
+      if (action === "instagram") {
+        try {
+          await copySeasonRecapCaption();
+          feedback.textContent = "Image downloaded and caption copied for Instagram.";
+        } catch { feedback.textContent = "Image downloaded. Add earthwar3k.com to your post."; }
+      } else feedback.textContent = "Report image downloaded.";
+    }
+  } catch (error) {
+    feedback.textContent = error.name === "AbortError" ? "Share cancelled." : error.message || "Could not export the report.";
+  } finally { button.disabled = false; }
+});
 document.querySelector("#progressionBackButton").addEventListener("click", () => showGameScreen(awardsScreen));
 document.querySelector("#progressionCommand").addEventListener("click", (event) => {
   if (!event.target.closest("[data-progression-action='continue']")) return;
@@ -1372,11 +1520,8 @@ document.querySelector("#awardsCommand").addEventListener("click", (event) => {
   const action = event.target.closest("[data-awards-action]")?.dataset.awardsAction;
   if (action === "playoffs") { try { window.ProxyFranchise.startPlayoffs(franchiseSession); showGameScreen(playoffsScreen); } catch (error) { showToast(`Playoffs failed: ${error.message}`); } }
   if (action === "offseason") {
-    try {
-      if (!franchiseSession?.playoffs?.complete) throw new Error("The playoff final is not complete.");
-      advanceOffseason();
-      showToast("Season progression ready");
-    } catch (error) { showToast(`Offseason failed: ${error.message}`); }
+    if (franchiseSession?.playoffs?.complete) { showGameScreen(seasonRecapScreen); persistFranchiseState(); }
+    else showToast("The playoff final is not complete.");
   }
 });
 document.querySelector("#awardsBoard").addEventListener("click", (event) => {

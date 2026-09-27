@@ -13,7 +13,16 @@
   </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#11100e">
-  <title>EarthWar 3K</title>
+  <title>Earth War Simulation League | EarthWar 3K</title>
+  <meta name="description" content="Draft history's greatest squad and lead an EWSL franchise through the season and playoffs.">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Earth War Simulation League">
+  <meta property="og:title" content="Earth War Simulation League | EarthWar 3K">
+  <meta property="og:description" content="Draft history's greatest squad. Can your EWSL season beat mine?">
+  <meta property="og:url" content="https://earthwar3k.com/">
+  <meta property="og:image" content="https://earthwar3k.com/rules/home.jpg">
+  <meta property="og:image:alt" content="EarthWar 3K arena">
+  <meta name="twitter:card" content="summary_large_image">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Anybody:ital,wdth,wght@0,75,400;0,75,600;0,75,800;0,110,700;1,75,600&amp;family=Afacad+Flux:wght@400;500;600&amp;family=Barlow+Condensed:ital,wght@0,600;0,700;0,800;1,600;1,700&amp;family=Fragment+Mono:ital@0;1&amp;family=Fraunces:opsz,wght@9..144,500;9..144,650;9..144,750&amp;family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
@@ -195,6 +204,35 @@
     <main class="awards-layout">
       <section class="awards-board" id="awardsBoard"></section>
       <aside class="awards-command" id="awardsCommand"></aside>
+    </main>
+  </section>
+
+  <section class="game-screen season-recap-screen" id="seasonRecapScreen" aria-labelledby="seasonRecapTitle" hidden>
+    <header class="season-recap-header">
+      <button class="match-back" id="seasonRecapBackButton" aria-label="Return to postseason honors">←</button>
+      <div><span class="menu-kicker">EWSL // Season Archive</span><h1 id="seasonRecapTitle">Season Report</h1></div>
+      <span id="seasonRecapYear"></span>
+    </header>
+    <main class="season-recap-layout">
+      <article class="season-recap-card" id="seasonRecapCard" aria-label="Shareable season report"></article>
+      <div class="season-recap-share">
+        <span>Share This Season</span>
+        <label class="season-recap-caption" for="seasonRecapCaption">Post Caption</label>
+        <textarea id="seasonRecapCaption" rows="3" readonly aria-label="Season report post caption"></textarea>
+        <nav aria-label="Share season report">
+          <a data-recap-platform="x" href="https://twitter.com/intent/tweet" target="_blank" rel="noopener noreferrer" aria-label="Post to X" title="Post to X"><b aria-hidden="true">X</b><small>X</small></a>
+          <a data-recap-platform="facebook" href="https://www.facebook.com/sharer/sharer.php" target="_blank" rel="noopener noreferrer" aria-label="Share on Facebook" title="Share on Facebook"><b aria-hidden="true">f</b><small>Facebook</small></a>
+          <a data-recap-platform="linkedin" href="https://www.linkedin.com/sharing/share-offsite/" target="_blank" rel="noopener noreferrer" aria-label="Share on LinkedIn" title="Share on LinkedIn"><b aria-hidden="true">in</b><small>LinkedIn</small></a>
+          <a data-recap-platform="sms" href="sms:?body=https%3A%2F%2Fearthwar3k.com%2F" aria-label="Share by text message" title="Share by text message"><b aria-hidden="true">SMS</b><small>Text</small></a>
+          <button type="button" data-recap-action="instagram" aria-label="Share image to Instagram or other apps" title="Share image to Instagram or other apps"><b aria-hidden="true">IG</b><small>Instagram</small></button>
+        </nav>
+      </div>
+      <div class="season-recap-actions">
+        <button type="button" data-recap-action="download">Download Image</button>
+        <button type="button" data-recap-action="caption">Copy Caption</button>
+        <button type="button" data-recap-action="continue">Continue to Offseason <span>→</span></button>
+      </div>
+      <p class="season-recap-feedback" id="seasonRecapFeedback" role="status" aria-live="polite"></p>
     </main>
   </section>
 
@@ -641,6 +679,7 @@
   <script src="draft-engine.js"></script>
   <script src="franchise-engine.js"></script>
   <script src="save-manager.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.13/dist/html-to-image.js"></script>
   <script src="app.js"></script>
   <script src="match-sim.js"></script>
   <!-- Cloudflare Web Analytics -->
