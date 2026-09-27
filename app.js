@@ -102,6 +102,7 @@ let activeSeasonView = "schedule";
 let activeRecordView = "players";
 let activeRecordStat = "averageRating";
 let franchiseSession = null;
+let preparedSeasonRecapImage = null;
 let selectedProtectionIds = new Set();
 let renewalFilter = "All";
 let renewalSort = { key: "ovr", dir: -1 };
@@ -623,8 +624,25 @@ function renderSeasonRecap() {
   document.querySelector('[data-recap-platform="linkedin"]').href = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(gameUrl)}`;
   document.querySelector('[data-recap-platform="sms"]').href = `sms:?body=${encodeURIComponent(caption)}`;
   document.querySelector("#seasonRecapCaption").value = caption;
-  document.querySelector('[data-recap-action="download"]').textContent = "Download Image";
+  const imageButton = document.querySelector('[data-recap-action="download"]');
+  imageButton.textContent = "Download Image";
   document.querySelector("#seasonRecapFeedback").textContent = "";
+  preparedSeasonRecapImage = null;
+  if (isAppleMobile()) {
+    imageButton.textContent = "Download to Files";
+    if (navigator.share) {
+      imageButton.textContent = "Preparing Photo...";
+      imageButton.disabled = true;
+      seasonRecapImage().then((file) => {
+        preparedSeasonRecapImage = file;
+        imageButton.textContent = canShareSeasonRecapImage(file) ? "Save to Photos" : "Download to Files";
+        if (!canShareSeasonRecapImage(file)) document.querySelector("#seasonRecapFeedback").textContent = "This browser cannot share this image to Photos. Download to Files is available.";
+      }).catch((error) => {
+        imageButton.textContent = "Download to Files";
+        document.querySelector("#seasonRecapFeedback").textContent = error.message;
+      }).finally(() => { imageButton.disabled = false; });
+    } else document.querySelector("#seasonRecapFeedback").textContent = "This browser cannot share images to Photos. Download to Files is available.";
+  }
 }
 
 function seasonRecapCaption() {
@@ -638,8 +656,12 @@ function seasonRecapCaption() {
   return `My ${team.name} finished ${standing.wins}-${standing.losses} in EWSL Year ${2999 + state.season}${finish}. Think you can top it? Play at https://earthwar3k.com/`;
 }
 
-function canShareSeasonRecapImage() {
-  return Boolean(navigator.share && navigator.canShare?.({ files: [new File(["report"], "report.png", { type: "image/png" })] }));
+function isAppleMobile() {
+  return /iPhone|iPad|iPod/.test(navigator.userAgent) || navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1;
+}
+
+function canShareSeasonRecapImage(file = new File(["report"], "report.png", { type: "image/png" })) {
+  return Boolean(navigator.share && navigator.canShare?.({ files: [file] }));
 }
 
 async function seasonRecapImage() {
@@ -1099,9 +1121,11 @@ function renderGameDetail(game) {
   const simEligible = !franchiseSession?.complete && game.week >= (franchiseSession?.currentWeek || 1);
   const opponent = franchiseSession?.teams.find((team) => team.name === game.opponent);
   const approach = opponent?.strategy?.replace(/([A-Z])/g, " $1").replace(/^./, (letter) => letter.toUpperCase()) || "Balanced";
-  const [venueStory, conditions] = venueDetails[game.biome] || [`${game.biome} offers its own routes around the five zones.`, "Clear skies"];
+  const opponentHomeField = opponent?.homeField || game.biome;
+  const opponentStory = venueDetails[opponentHomeField]?.[0] || `${game.opponent} defend ${opponentHomeField} when playing at home.`;
+  const conditions = venueDetails[game.biome]?.[1] || "Clear skies";
   detail.innerHTML = `<header class="game-detail-header"><div><span class="menu-kicker">Week ${game.week} ${playable ? "Current" : "Upcoming"}</span><h2>Match Brief</h2></div><span class="game-result-tag">${game.venue}</span></header>
-    <div class="upcoming-brief"><img class="brief-opponent-logo" src="${teamLogo(game.opponent)}" alt=""><span class="menu-kicker">${userDraftTeam.name} vs</span><h2>${game.opponent}</h2><p>${venueStory}</p><div class="matchup-facts"><div><span>Opponent approach</span><strong>${approach}</strong></div><div><span>Conditions</span><strong>${conditions}</strong></div></div></div>
+    <div class="upcoming-brief"><img class="brief-opponent-logo" src="${teamLogo(game.opponent)}" alt=""><span class="menu-kicker">${userDraftTeam.name} vs</span><h2>${game.opponent}</h2><p>Opponent home field // ${opponentHomeField}. ${opponentStory}</p><div class="matchup-facts"><div><span>Opponent approach</span><strong>${approach}</strong></div><div><span>Conditions</span><strong>${conditions}</strong></div></div></div>
     ${simEligible ? `<div class="game-actions"><button class="watch-live" data-season-action="watch" data-game-index="${game.week - 1}">Watch Live<span>${game.week > (franchiseSession?.currentWeek || 1) ? `Sim through Week ${game.week}` : "Open Strategy Room"}</span></button><button class="quick-sim" data-season-action="quick" data-game-index="${game.week - 1}">Quick Sim<span>${game.week > (franchiseSession?.currentWeek || 1) ? `Resolve Weeks 1-${game.week}` : "Resolve immediately"}</span></button></div>` : ""}`;
 }
 
@@ -1542,10 +1566,15 @@ document.querySelector("#seasonRecapScreen").addEventListener("click", async (ev
       feedback.textContent = "Season caption copied.";
       return;
     }
+    if (action === "download" && isAppleMobile() && preparedSeasonRecapImage && canShareSeasonRecapImage(preparedSeasonRecapImage)) {
+      await navigator.share({ files: [preparedSeasonRecapImage] });
+      feedback.textContent = "Choose Save Image in the iOS share sheet.";
+      return;
+    }
     const nativeImageShare = action === "instagram" && canShareSeasonRecapImage();
     if (action === "instagram" && !nativeImageShare) window.open("https://www.instagram.com/", "_blank", "noopener,noreferrer");
     feedback.textContent = "Preparing report image...";
-    const file = await seasonRecapImage();
+    const file = preparedSeasonRecapImage || await seasonRecapImage();
     if (nativeImageShare) {
       await navigator.share({ title: `${userDraftTeam.name} // Year ${2999 + franchiseSession.season}`, text: seasonRecapCaption(), files: [file] });
       feedback.textContent = "Report shared.";
@@ -1556,7 +1585,7 @@ document.querySelector("#seasonRecapScreen").addEventListener("click", async (ev
           await copySeasonRecapCaption();
           feedback.textContent = "Image downloaded and caption copied for Instagram.";
         } catch { feedback.textContent = "Image downloaded. Add earthwar3k.com to your post."; }
-      } else feedback.textContent = "Report image downloaded.";
+      } else feedback.textContent = isAppleMobile() ? "Image downloaded to Files. This browser cannot send it to Photos." : "Report image downloaded.";
     }
   } catch (error) {
     feedback.textContent = error.name === "AbortError" ? "Share cancelled." : error.message || "Could not export the report.";
