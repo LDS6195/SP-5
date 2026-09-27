@@ -662,9 +662,40 @@ async function seasonRecapImage() {
   if (!window.htmlToImage) throw new Error("Image export is unavailable. Screenshot the report instead.");
   const card = document.querySelector("#seasonRecapCard");
   await document.fonts.ready;
-  const blob = await window.htmlToImage.toBlob(card, { pixelRatio: 2, backgroundColor: "#f2e8d4", cacheBust: true, imagePlaceholder: blankPlayerSilhouette });
-  if (!blob) throw new Error("The report image could not be created. Screenshot the card instead.");
-  return new File([blob], `earthwar3k-${teamSlug(userDraftTeam.name)}-${2999 + franchiseSession.season}.png`, { type: "image/png" });
+  const images = [...card.querySelectorAll("img")];
+  const sources = [...new Set(images.map((image) => image.currentSrc || image.src))];
+  const embedded = new Map();
+  try {
+    for (let offset = 0; offset < sources.length; offset += 3) {
+      const batch = await Promise.all(sources.slice(offset, offset + 3).map(async (source) => {
+        if (source.startsWith("data:")) return [source, source];
+        const response = await fetch(source, { mode: "cors" });
+        if (!response.ok || !response.headers.get("content-type")?.startsWith("image/")) throw new Error("Report image unavailable");
+        const image = await response.blob();
+        const dataUrl = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = () => reject(reader.error);
+          reader.readAsDataURL(image);
+        });
+        return [source, dataUrl];
+      }));
+      batch.forEach(([source, dataUrl]) => embedded.set(source, dataUrl));
+    }
+  } catch { throw new Error("Some report images could not be included. Screenshot the card instead."); }
+  const exportCard = card.cloneNode(true);
+  exportCard.removeAttribute("id");
+  exportCard.style.position = "fixed";
+  exportCard.style.left = "-10000px";
+  exportCard.style.top = "0";
+  exportCard.style.width = `${card.getBoundingClientRect().width}px`;
+  [...exportCard.querySelectorAll("img")].forEach((image, index) => { image.src = embedded.get(images[index].currentSrc || images[index].src); });
+  document.body.append(exportCard);
+  try {
+    const blob = await window.htmlToImage.toBlob(exportCard, { pixelRatio: 2, backgroundColor: "#f2e8d4" });
+    if (!blob) throw new Error("The report image could not be created. Screenshot the card instead.");
+    return new File([blob], `earthwar3k-${teamSlug(userDraftTeam.name)}-${2999 + franchiseSession.season}.png`, { type: "image/png" });
+  } finally { exportCard.remove(); }
 }
 
 function downloadSeasonRecap(file) {
