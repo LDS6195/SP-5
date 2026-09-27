@@ -751,10 +751,10 @@
       "source": "Wikidata / Wikimedia Commons"
     },
     "Devin Booker": {
-      "title": "2025-01-05%20ALBA%20Berlin%20gegen%20FC%20Bayern%20M%C3%BCnchen%20%28Basketball-Bundesliga%202024-25%29%20by%20Sandro%20Halank%E2%80%93056.jpg",
-      "url": "https://commons.wikimedia.org/wiki/Special:FilePath/2025-01-05_ALBA_Berlin_gegen_FC_Bayern_M%C3%BCnchen_(Basketball-Bundesliga_2024-25)_by_Sandro_Halank%E2%80%93056.jpg?width=320",
-      "pageUrl": "http://commons.wikimedia.org/wiki/Special:FilePath/2025-01-05%20ALBA%20Berlin%20gegen%20FC%20Bayern%20M%C3%BCnchen%20%28Basketball-Bundesliga%202024-25%29%20by%20Sandro%20Halank%E2%80%93056.jpg",
-      "source": "Wikidata / Wikimedia Commons"
+      "title": "Devin%20Booker%20%2830362063153%29%20%28cropped%29.jpg",
+      "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Devin_Booker_(30362063153)_(cropped).jpg?width=320",
+      "pageUrl": "https://commons.wikimedia.org/wiki/File:Devin_Booker_(30362063153)_(cropped).jpg",
+      "source": "Wikimedia Commons"
     },
     "Trae Young": {
       "title": "Trae%20Young%20%282022%20All-Star%20Weekend%29%20%28cropped%29.jpg",
@@ -979,10 +979,10 @@
       "source": "Wikidata / Wikimedia Commons"
     },
     "Barry Sanders": {
-      "title": "BarrySanders.jpg",
-      "url": "https://commons.wikimedia.org/wiki/Special:FilePath/BarrySanders.jpg?width=320",
-      "pageUrl": "http://commons.wikimedia.org/wiki/Special:FilePath/BarrySanders.jpg",
-      "source": "Wikidata / Wikimedia Commons"
+      "title": "Barry%20Sanders%202019.jpg",
+      "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Barry_Sanders_2019.jpg?width=320",
+      "pageUrl": "https://commons.wikimedia.org/wiki/File:Barry_Sanders_2019.jpg",
+      "source": "Wikimedia Commons"
     },
     "Adrian Peterson": {
       "title": "Adrian%20Peterson%20%28cropped%29.jpg",
@@ -1147,10 +1147,10 @@
       "source": "Wikidata / Wikimedia Commons"
     },
     "Pele": {
-      "title": "Pele%20by%20David%20Howard%20Hitchcock%2C%20c.%201929.jpg",
-      "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Pele_by_David_Howard_Hitchcock%2C_c._1929.jpg?width=320",
-      "pageUrl": "http://commons.wikimedia.org/wiki/Special:FilePath/Pele%20by%20David%20Howard%20Hitchcock%2C%20c.%201929.jpg",
-      "source": "Wikidata / Wikimedia Commons"
+      "title": "Pele%20con%20brasil%20%28cropped%29.jpg",
+      "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Pele_con_brasil_(cropped).jpg?width=320",
+      "pageUrl": "https://commons.wikimedia.org/wiki/File:Pele_con_brasil_(cropped).jpg",
+      "source": "Wikimedia Commons"
     },
     "Neymar": {
       "title": "Neymar%20Junior%20Brazil%20V%20Morocco%2013%20June%202026-40.jpg",
@@ -1219,10 +1219,10 @@
       "source": "Wikidata / Wikimedia Commons"
     },
     "Chris Johnson": {
-      "title": "Chris%20Johnson%20%28cornerback%29.JPG",
-      "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Chris_Johnson_(cornerback).JPG?width=320",
-      "pageUrl": "http://commons.wikimedia.org/wiki/Special:FilePath/Chris%20Johnson%20%28cornerback%29.JPG",
-      "source": "Wikidata / Wikimedia Commons"
+      "title": "Chris%20Johnson%20sitting%20on%20his%20helmet%20%28cropped%29.jpg",
+      "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Chris_Johnson_sitting_on_his_helmet_(cropped).jpg?width=320",
+      "pageUrl": "https://commons.wikimedia.org/wiki/File:Chris_Johnson_sitting_on_his_helmet_(cropped).jpg",
+      "source": "Wikimedia Commons"
     },
     "Rickey Henderson": {
       "title": "Rickeyhenderson2002.jpg",
@@ -1261,10 +1261,10 @@
       "source": "Wikidata / Wikimedia Commons"
     },
     "Sacagawea": {
-      "title": "GPS%20Block%20IIIA%20%28cropped%29.jpg",
-      "url": "https://commons.wikimedia.org/wiki/Special:FilePath/GPS_Block_IIIA_(cropped).jpg?width=320",
-      "pageUrl": "http://commons.wikimedia.org/wiki/Special:FilePath/GPS%20Block%20IIIA%20%28cropped%29.jpg",
-      "source": "Wikidata / Wikimedia Commons"
+      "title": "Sacagawea%20statue%20from%20Gaston%27s%20Centennial%20History%20of%20Oregon.png",
+      "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Sacagawea_statue_from_Gaston%27s_Centennial_History_of_Oregon.png?width=320",
+      "pageUrl": "https://commons.wikimedia.org/wiki/File:Sacagawea_statue_from_Gaston%27s_Centennial_History_of_Oregon.png",
+      "source": "Wikimedia Commons (historical depiction)"
     },
     "Amelia Earhart": {
       "title": "Amelia%20Earhart%201935.jpg",
@@ -1291,10 +1291,10 @@
       "source": "Wikidata / Wikimedia Commons"
     },
     "Antonio Brown": {
-      "title": "Antonio%20Browns%20%28born%201978%29%20WAS%20%28cropped%29.jpg",
-      "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Antonio_Browns_(born_1978)_WAS_(cropped).jpg?width=320",
-      "pageUrl": "http://commons.wikimedia.org/wiki/Special:FilePath/Antonio%20Browns%20%28born%201978%29%20WAS%20%28cropped%29.jpg",
-      "source": "Wikidata / Wikimedia Commons"
+      "title": "Antonio%20Brown%202015%20%28cropped%29.jpg",
+      "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Antonio_Brown_2015_(cropped).jpg?width=320",
+      "pageUrl": "https://commons.wikimedia.org/wiki/File:Antonio_Brown_2015_(cropped).jpg",
+      "source": "Wikimedia Commons"
     },
     "Cooper Kupp": {
       "title": "Cooper%20Kupp.jpg",
@@ -1531,10 +1531,10 @@
       "source": "Wikidata / Wikimedia Commons"
     },
     "Mike Tyson": {
-      "title": "Mike%20Tyson%20Cardinals.jpg",
-      "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Mike_Tyson_Cardinals.jpg?width=320",
-      "pageUrl": "http://commons.wikimedia.org/wiki/Special:FilePath/Mike%20Tyson%20Cardinals.jpg",
-      "source": "Wikidata / Wikimedia Commons"
+      "title": "Mike%20Tyson%20Photo%20Op%20GalaxyCon%20Austin%202023.jpg",
+      "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Mike_Tyson_Photo_Op_GalaxyCon_Austin_2023.jpg?width=320",
+      "pageUrl": "https://commons.wikimedia.org/wiki/File:Mike_Tyson_Photo_Op_GalaxyCon_Austin_2023.jpg",
+      "source": "Wikimedia Commons"
     },
     "George Foreman": {
       "title": "George%20Foreman%20%281973%29.jpg",
@@ -1903,10 +1903,10 @@
       "source": "Wikidata / Wikimedia Commons"
     },
     "Goldberg": {
-      "title": "Zlvrch.jpg",
-      "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Zlvrch.jpg?width=320",
-      "pageUrl": "http://commons.wikimedia.org/wiki/Special:FilePath/Zlvrch.jpg",
-      "source": "Wikidata / Wikimedia Commons"
+      "title": "Bill%20Goldberg%20Boerne%2001%20%28cropped%29.jpg",
+      "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Bill_Goldberg_Boerne_01_(cropped).jpg?width=320",
+      "pageUrl": "https://commons.wikimedia.org/wiki/File:Bill_Goldberg_Boerne_01_(cropped).jpg",
+      "source": "Wikimedia Commons"
     },
     "CM Punk": {
       "title": "CM%20Punk%20at%20San%20Diego%20Comic%20Con%202026.jpg",
@@ -2059,10 +2059,10 @@
       "source": "Wikidata / Wikimedia Commons"
     },
     "Brian Shaw": {
-      "title": "Brian%20Shaw.jpg",
-      "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Brian_Shaw.jpg?width=320",
-      "pageUrl": "http://commons.wikimedia.org/wiki/Special:FilePath/Brian%20Shaw.jpg",
-      "source": "Wikidata / Wikimedia Commons"
+      "title": "Brian%20Shaw%20Arnold%20Classic%202017e.jpg",
+      "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Brian_Shaw_Arnold_Classic_2017e.jpg?width=320",
+      "pageUrl": "https://commons.wikimedia.org/wiki/File:Brian_Shaw_Arnold_Classic_2017e.jpg",
+      "source": "Wikimedia Commons"
     },
     "Eddie Hall": {
       "title": "Eddie%20Hall.jpg",

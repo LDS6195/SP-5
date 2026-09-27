@@ -15,6 +15,7 @@ const roleImages = {
   Musical: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=900&q=82"
 };
 const blankPlayerSilhouette = `data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 420"><rect width="320" height="420" fill="#d8c7aa"/><circle cx="160" cy="135" r="62" fill="#7d8179"/><path d="M48 420c7-94 51-151 112-151s105 57 112 151" fill="#7d8179"/><path d="M81 420c13-68 39-105 79-105s66 37 79 105" fill="#626860" opacity=".6"/></svg>`)}`;
+const playerPortraits = new Map(window.PROXY_PLAYER_POOL.map((player) => [player.id, player.image?.url]));
 const roleDisplayNames = { Visual: "Visual Signaler", Musical: "Sonic Signaler" };
 const roleShortLabels = { Visual: "V-SIG", Musical: "S-SIG" };
 function displayRole(role) {
@@ -33,7 +34,7 @@ function shortRole(role) {
   return roleShortLabels[role] || role.slice(0, 3).toUpperCase();
 }
 function playerImage(player) {
-  return player?.image?.url || blankPlayerSilhouette;
+  return playerPortraits.get(player?.id) || player?.image?.url || blankPlayerSilhouette;
 }
 const roleAttributeLabels = {
   General: [["Tactical IQ", "tacticalIQ"], ["Leadership", "leadership"], ["Awareness", "awareness"], ["Composure", "composure"]],
