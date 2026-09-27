@@ -6,6 +6,23 @@
   const controlTickSeconds = 10;
   const colors = { home: "#d85338", away: "#4dcca1", neutral: "#c5a15b" };
   const zoneLabels = ["Alpha", "Bravo", "Charlie", "Delta", "Echo"];
+  function arenaOffset(name, salt, range) {
+    let hash = 2166136261;
+    for (const character of `${name}:${salt}`) hash = Math.imul(hash ^ character.charCodeAt(0), 16777619);
+    return ((hash >>> 0) / 4294967295 - .5) * range;
+  }
+  function arenaLayout(name) {
+    const zones = [[.25, .22, .075], [.75, .22, .075], [.5, .5, .08], [.25, .78, .075], [.75, .78, .075]]
+      .map(([x, y, radius], index) => ({ x: x + arenaOffset(name, index * 3, .075), y: y + arenaOffset(name, index * 3 + 1, .075), radius: radius + arenaOffset(name, index * 3 + 2, .012) }));
+    const boundary = [[.06, .26], [.14, .09], [.34, .035], [.66, .035], [.86, .09], [.94, .26], [.97, .5], [.94, .74], [.86, .91], [.66, .965], [.34, .965], [.14, .91], [.06, .74], [.03, .5]]
+      .map(([x, y], index) => [Math.max(.02, Math.min(.98, x + arenaOffset(name, 20 + index * 2, .04))), Math.max(.02, Math.min(.98, y + arenaOffset(name, 21 + index * 2, .04)))]);
+    const terrain = [[.23, .48, .13, .055], [.77, .52, .13, .055], [.49, .18, .035, .15], [.51, .82, .035, .15]]
+      .map(([x, y, width, height], index) => [x + arenaOffset(name, 50 + index * 2, .1), y + arenaOffset(name, 51 + index * 2, .1), width, height]);
+    return { zones, boundary, terrain };
+  }
+  let arenaName = "Civic Rotunda";
+  let arenaHomeSide = "home";
+  let arenaGeometry = arenaLayout(arenaName);
   const initialSeed = 3000;
   let randomState = initialSeed;
   let completionHandler = null;
@@ -295,15 +312,10 @@
     state.effects.away = planEffects(state.plans.away);
     applyMatchupEffects();
     state.form = { home: 1 + (random() - .5) * .22, away: 1 + (random() - .5) * .22 };
+    state.form[arenaHomeSide] *= 1.015;
     state.momentum = { home: 1, away: 1 };
     state.momentumClock = 0;
-    state.zones = [
-      { x: .25, y: .22, radius: .075, owner: null, capture: 0, pressure: 0 },
-      { x: .75, y: .22, radius: .075, owner: null, capture: 0, pressure: 0 },
-      { x: .5, y: .5, radius: .08, owner: null, capture: 0, pressure: 0 },
-      { x: .25, y: .78, radius: .075, owner: null, capture: 0, pressure: 0 },
-      { x: .75, y: .78, radius: .075, owner: null, capture: 0, pressure: 0 }
-    ];
+    state.zones = arenaGeometry.zones.map((zone) => ({ ...zone, owner: null, capture: 0, pressure: 0 }));
     state.agents = [];
     ["home", "away"].forEach((team) => {
       const direction = team === "home" ? 1 : -1;
@@ -630,10 +642,7 @@
     context.clearRect(0, 0, width, height);
     context.fillStyle = "#0c1713";
     context.fillRect(0, 0, width, height);
-    const boundary = [
-      [.06, .26], [.14, .09], [.34, .035], [.66, .035], [.86, .09], [.94, .26],
-      [.97, .5], [.94, .74], [.86, .91], [.66, .965], [.34, .965], [.14, .91], [.06, .74], [.03, .5]
-    ];
+    const boundary = arenaGeometry.boundary;
     context.save();
     context.beginPath();
     boundary.forEach(([x, y], index) => index ? context.lineTo(x * width, y * height) : context.moveTo(x * width, y * height));
@@ -652,10 +661,7 @@
     context.beginPath(); context.moveTo(width / 2, 18); context.lineTo(width / 2, height - 18); context.stroke();
     context.fillStyle = "rgba(216,83,56,.12)"; context.fillRect(0, 0, width * .105, height);
     context.fillStyle = "rgba(77,204,161,.12)"; context.fillRect(width * .895, 0, width * .105, height);
-    const terrain = [
-      [.23, .48, .13, .055], [.77, .52, .13, .055],
-      [.49, .18, .035, .15], [.51, .82, .035, .15]
-    ];
+    const terrain = arenaGeometry.terrain;
     terrain.forEach(([x, y, terrainWidth, terrainHeight], index) => {
       context.save();
       context.translate(x * width, y * height);
@@ -673,6 +679,10 @@
     context.lineWidth = 3;
     context.strokeStyle = "rgba(229,205,149,.7)";
     context.stroke();
+    context.fillStyle = "rgba(244,234,215,.68)";
+    context.font = "10px 'Fragment Mono'";
+    context.textAlign = "center";
+    context.fillText(arenaName.toUpperCase(), width / 2, height * .09);
   }
 
   function draw() {
@@ -852,6 +862,12 @@
       const fieldLabel = document.querySelector(`#${team}FieldLabel`);
       if (fieldLabel) fieldLabel.textContent = teamIdentity[team].name;
       document.querySelector("#matchTitle").textContent = `${teamIdentity.home.name} vs ${teamIdentity.away.name}`;
+    },
+    setArena(name, homeSide = "home") {
+      arenaName = name || "Civic Rotunda";
+      arenaHomeSide = homeSide;
+      arenaGeometry = arenaLayout(arenaName);
+      reset();
     },
     setTeamRoster(team, lineup, bench = []) {
       rosters[team] = lineup.map(({ player, role }) => ({ ...player, assignedRole: role }));

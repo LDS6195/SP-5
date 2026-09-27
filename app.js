@@ -669,7 +669,8 @@ async function seasonRecapImage() {
   const card = document.querySelector("#seasonRecapCard");
   await document.fonts.ready;
   const images = [...card.querySelectorAll("img")];
-  const sources = [...new Set(images.map((image) => image.currentSrc || image.src))];
+  const imageSources = images.map((image) => image.currentSrc || image.src);
+  const sources = [...new Set(imageSources)];
   const embedded = new Map();
   const missingImages = new Set();
   for (let offset = 0; offset < sources.length; offset += 3) {
@@ -693,19 +694,14 @@ async function seasonRecapImage() {
     }));
     batch.forEach(([source, dataUrl]) => embedded.set(source, dataUrl));
   }
-  const exportCard = card.cloneNode(true);
-  exportCard.removeAttribute("id");
-  exportCard.style.position = "fixed";
-  exportCard.style.left = "-10000px";
-  exportCard.style.top = "0";
-  exportCard.style.width = `${card.getBoundingClientRect().width}px`;
-  [...exportCard.querySelectorAll("img")].forEach((image, index) => { image.src = embedded.get(images[index].currentSrc || images[index].src); });
-  document.body.append(exportCard);
+  const originalSources = images.map((image) => image.getAttribute("src"));
   try {
-    const blob = await window.htmlToImage.toBlob(exportCard, { pixelRatio: 2, backgroundColor: "#f2e8d4" });
+    images.forEach((image, index) => { image.src = embedded.get(imageSources[index]); });
+    await Promise.all(images.map((image) => image.decode?.().catch(() => undefined)));
+    const blob = await window.htmlToImage.toBlob(card, { pixelRatio: 2, backgroundColor: "#f2e8d4" });
     if (!blob) throw new Error("The report image could not be created. Screenshot the card instead.");
     return { file: new File([blob], `earthwar3k-${teamSlug(userDraftTeam.name)}-${2999 + franchiseSession.season}.png`, { type: "image/png" }), missingImages: missingImages.size };
-  } finally { exportCard.remove(); }
+  } finally { images.forEach((image, index) => { image.src = originalSources[index]; }); }
 }
 
 function downloadSeasonRecap(file) {
@@ -1109,6 +1105,39 @@ function renderRecords() {
   if (activeRecordView === "trophies") content.innerHTML = renderTrophyRoom();
 }
 
+const venueDetails = {
+  "Madison Square Garden": ["The Garden crowd surrounds a tight field beneath the city lights.", "Indoor roar"],
+  "Rose Bowl": ["Open stands and long sightlines frame the old Pasadena bowl.", "Clear skies"],
+  "High Plateau": ["Thin air carries the noise across the plateau above Mexico City.", "Dry altitude"],
+  "Frozen Terminal": ["Toronto's freight terminal has been cleared beneath a canopy of frost.", "Cold haze"],
+  "Canopy Grid": ["Layers of elevated walkways cut through the Sao Paulo canopy.", "Humid air"],
+  "River Exchange": ["The Buenos Aires river docks make every approach feel exposed.", "River breeze"],
+  "Castle of Oz": ["Costa Rica's old hilltop walls shelter a maze of short routes.", "Cloud cover"],
+  "Civic Rotunda": ["Chicago's civic columns break the wind around the central field.", "Lake winds"],
+  "Churchill Downs": ["The Louisville grandstand overlooks a broad, sunlit oval.", "Track dust"],
+  "Hill Country": ["Austin's broken ridgelines lead into a sheltered central basin.", "Warm gusts"],
+  "Rainworks": ["Seattle's rain collectors channel runoff around the outer lanes.", "Steady rain"],
+  "Biscayne Causeway": ["Water flanks the Miami causeway on both sides of the field.", "Sea spray"],
+  "Bayou Crossroads": ["New Orleans' raised crossings disappear into low river mist.", "Heavy mist"],
+  "Mile High Switchbacks": ["Denver's switchback paths climb above the central approach.", "Thin air"],
+  "The Orpheum": ["Vancouver's old theater district opens onto a narrow plaza.", "Coastal fog"],
+  "Flooded Borough": ["London's elevated streets rise over the flooded lower blocks.", "Light drizzle"],
+  "Iron Ring": ["Berlin's steel perimeter gives way to a stark open center.", "Overcast"],
+  "Grand Arcade": ["Paris' covered arcades connect a web of small courtyards.", "Cool air"],
+  "Marble Basin": ["Rome's pale stone terraces descend toward the basin floor.", "Warm stone"],
+  "Sun Court": ["Madrid's bright court leaves little shade along its approaches.", "Hard sunlight"],
+  "Green Bastion": ["Dublin's grassy fortifications conceal narrow outer paths.", "Soft rain"],
+  "Archipelago Yard": ["Stockholm's island yards are linked by open crossings.", "Sea wind"],
+  "Bosporus Crossing": ["Istanbul's bridges stretch between two crowded shorelines.", "Channel wind"],
+  "Neon Canals": ["Tokyo's canals reflect the signs above their waterside routes.", "Night haze"],
+  "Glass Gardens": ["Seoul's greenhouse walls divide the field into open courts.", "Glass glare"],
+  "Rain District": ["Mumbai's monsoon drains run beside the crowded lanes.", "Monsoon rain"],
+  "Harbor Stack": ["Singapore's stacked harbor platforms face the open water.", "Salt air"],
+  "Winter Complex": ["Moscow's winter yards lie between snow-lined concrete walls.", "Falling snow"],
+  "Desert Causeway": ["Cairo's stone causeway cuts a path through pale sand.", "Dry heat"],
+  "Lagoon Exchange": ["Lagos' lagoon crossings join markets along the water's edge.", "Tropical haze"]
+};
+
 function renderGameDetail(game) {
   const detail = document.querySelector("#gameDetail");
   if (game.result) {
@@ -1121,8 +1150,11 @@ function renderGameDetail(game) {
   }
   const playable = game.status === "current";
   const simEligible = !franchiseSession?.complete && game.week >= (franchiseSession?.currentWeek || 1);
+  const opponent = franchiseSession?.teams.find((team) => team.name === game.opponent);
+  const approach = opponent?.strategy?.replace(/([A-Z])/g, " $1").replace(/^./, (letter) => letter.toUpperCase()) || "Balanced";
+  const [venueStory, conditions] = venueDetails[game.biome] || [`${game.biome} offers its own routes around the five zones.`, "Clear skies"];
   detail.innerHTML = `<header class="game-detail-header"><div><span class="menu-kicker">Week ${game.week} ${playable ? "Current" : "Upcoming"}</span><h2>Match Brief</h2></div><span class="game-result-tag">${game.venue}</span></header>
-    <div class="upcoming-brief"><img class="brief-opponent-logo" src="${teamLogo(game.opponent)}" alt=""><span class="menu-kicker">${userDraftTeam.name} vs</span><h2>${game.opponent}</h2><p>${game.biome} presents a symmetrical five-zone battlefield. Review the active lineup and lock a game plan before live simulation, or resolve the matchup immediately.</p><div class="matchup-facts"><div><span>Opponent form</span><strong>${game.week % 2 ? "Aggressive" : "Balanced"}</strong></div><div><span>Projected edge</span><strong>Home +2</strong></div></div></div>
+    <div class="upcoming-brief"><img class="brief-opponent-logo" src="${teamLogo(game.opponent)}" alt=""><span class="menu-kicker">${userDraftTeam.name} vs</span><h2>${game.opponent}</h2><p>${venueStory}</p><div class="matchup-facts"><div><span>Opponent approach</span><strong>${approach}</strong></div><div><span>Conditions</span><strong>${conditions}</strong></div></div></div>
     ${simEligible ? `<div class="game-actions"><button class="watch-live" data-season-action="watch" data-game-index="${game.week - 1}">Watch Live<span>${game.week > (franchiseSession?.currentWeek || 1) ? `Sim through Week ${game.week}` : "Open Strategy Room"}</span></button><button class="quick-sim" data-season-action="quick" data-game-index="${game.week - 1}">Quick Sim<span>${game.week > (franchiseSession?.currentWeek || 1) ? `Resolve Weeks 1-${game.week}` : "Resolve immediately"}</span></button></div>` : ""}`;
 }
 
@@ -1227,6 +1259,7 @@ function configureSeasonMatchup(gameIndex) {
   window.matchSimulator.setTeamRoster("away", awayLineup.lineup, awayLineup.reserves);
   window.matchSimulator.setTeamIdentity("home", { name: userDraftTeam.name, abbreviation: teamAbbreviation(userDraftTeam.name), logo: teamLogo(userDraftTeam.name) });
   window.matchSimulator.setTeamIdentity("away", { name: opponent.name, abbreviation: teamAbbreviation(opponent.name), logo: teamLogo(opponent.name) });
+  window.matchSimulator.setArena(displayGame.biome, displayGame.venue === "Home" ? "home" : "away");
 }
 
 function configurePlayoffMatch(game) {
@@ -1238,6 +1271,7 @@ function configurePlayoffMatch(game) {
   window.matchSimulator.setTeamRoster("away", awayLineup.lineup, awayLineup.reserves);
   window.matchSimulator.setTeamIdentity("home", { name: userDraftTeam.name, abbreviation: teamAbbreviation(userDraftTeam.name), logo: teamLogo(userDraftTeam.name) });
   window.matchSimulator.setTeamIdentity("away", { name: opponent.name, abbreviation: teamAbbreviation(opponent.name), logo: teamLogo(opponent.name) });
+  window.matchSimulator.setArena(game.homeTeamId === userDraftTeam.id ? userDraftTeam.homeField : opponent.homeField, game.homeTeamId === userDraftTeam.id ? "home" : "away");
   document.querySelector(".strategy-opponent strong").textContent = opponent.name;
   document.querySelector(".strategy-opponent small").textContent = `${game.round} // Postseason`;
   document.querySelector("#matchTitle").textContent = `${userDraftTeam.name} vs ${opponent.name}`;
