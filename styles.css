@@ -293,9 +293,11 @@ button:focus-visible, a:focus-visible { outline: 3px solid #fff; outline-offset:
 .protected-list { margin: 18px 0; border-top: 1px solid #52695f; }.protected-list > span { display: flex; justify-content: space-between; gap: 8px; padding: 9px 0; border-bottom: 1px solid #52695f; font-size: 10px; }.protected-list b { color: #efd28f; font: 8px var(--mono); }.protected-list p { color: #cbbda4; font-size: 11px; }
 .protection-warning { padding: 12px; color: #dfcfb4 !important; background: #47231d; border-left: 3px solid #8f2f24; }
 .renewal-draft-board { margin: 18px 0; padding: 12px; color: #e7d9c1; background: #172d25; border: 1px solid #52695f; }.renewal-draft-board header { display: flex; justify-content: space-between; gap: 10px; font: 9px var(--mono); text-transform: uppercase; }.renewal-draft-board header b { color: #efd28f; }.renewal-draft-board p { margin: 8px 0 0; color: #b8aa91; font: 9px var(--mono); }.renewal-progress { height: 6px; margin-top: 10px; background: #3b5147; }.renewal-progress i { display: block; height: 100%; background: #c7a45d; }.renewal-needs { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin: 18px 0; }.renewal-needs span { display: flex; justify-content: space-between; padding: 8px; color: #e7d9c1; background: #354d43; font-size: 9px; }.renewal-needs span.filled { opacity: .5; }.renewal-needs b { color: #efd28f; font-family: var(--mono); }
-.player-history-link { padding: 0; color: inherit; background: transparent; text-align: left; }
-.player-history-link:hover strong { color: #8f2f24; text-decoration: underline; text-underline-offset: 3px; }
-.player-history-panel { position: fixed; z-index: 60; inset: 0 0 0 auto; width: min(470px, 92vw); padding: 48px 28px 30px; overflow-y: auto; color: #f0e4cf; background-color: #203a30; background-image: repeating-linear-gradient(55deg, rgba(255,255,255,.018) 0 1px, transparent 1px 4px); border-left: 5px solid #c7a45d; box-shadow: -25px 0 60px rgba(0,0,0,.42); }
+.player-history-link { position: relative; display: inline-block; padding: 0 15px 1px 0; color: #713a2d; background: transparent; border-bottom: 1px dotted currentColor; text-align: left; font-weight: 700; cursor: pointer; }
+.player-history-link::after { position: absolute; top: 0; right: 0; content: "↗"; font: 12px var(--mono); }
+.player-history-link:hover, .player-history-link:focus-visible { color: #8f2f24; border-bottom-style: solid; }
+.player-history-link:focus-visible { outline: 2px solid currentColor; outline-offset: 3px; }
+.player-history-panel { position: fixed; z-index: 60; inset: 0 0 0 auto; width: min(850px, calc(100vw - 48px)); padding: 48px 28px 30px; overflow-y: auto; color: #f0e4cf; background-color: #203a30; background-image: repeating-linear-gradient(55deg, rgba(255,255,255,.018) 0 1px, transparent 1px 4px); border-left: 5px solid #c7a45d; box-shadow: -25px 0 60px rgba(0,0,0,.42); }
 .player-history-panel > button { position: absolute; top: 14px; right: 14px; width: 42px; height: 42px; color: #f0e4cf; background: transparent; border: 1px solid #71877d; font-size: 24px; }
 .player-history-panel h2 { margin: 9px 0 4px; font: italic 800 39px/.9 var(--condensed); text-transform: uppercase; }
 .history-role { color: #cabda5; font: 10px var(--mono); text-transform: uppercase; }
@@ -309,7 +311,21 @@ button:focus-visible, a:focus-visible { outline: 3px solid #fff; outline-offset:
 .profile-career-total { display: grid; gap: 3px; padding-right: 14px; border-right: 1px solid #52685f; }
 .profile-career-total strong { color: #efd28f; font: 800 38px/.8 var(--condensed); }.profile-career-total b { margin-top: 10px; color: #f1e5cf; font: 700 18px var(--mono); }.profile-career-total span { color: #c5b9a1; font: 9px var(--mono); text-transform: uppercase; }
 .profile-career-copy { color: #c5b9a1; font-size: 11px; line-height: 1.6; }.profile-career-copy p { margin: 0 0 8px; }
-.profile-season-card { margin-bottom: 10px; padding: 13px; background: rgba(16,35,28,.6); border-left: 3px solid #c7a45d; }.profile-season-card header { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 10px; }.profile-season-card header strong { color: #efd28f; font: 700 16px var(--condensed); }.profile-season-card header span { color: #c5b9a1; font: 9px var(--mono); text-align: right; }.player-season-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }.player-season-stats span { color: #c5b9a1; font: 8px var(--mono); }.player-season-stats b { display: block; color: #f1e5cf; font-size: 11px; }.profile-accolades .accolade-summary { display: grid; grid-template-columns: auto 1fr; align-items: baseline; gap: 4px 10px; padding: 15px; margin-bottom: 14px; background: rgba(16,35,28,.6); }.accolade-summary strong { color: #efd28f; font: 800 31px var(--condensed); }.accolade-summary span { color: #c5b9a1; font: 9px var(--mono); text-transform: uppercase; }.profile-accolades ol { margin: 0; padding: 0; list-style: none; }.profile-accolades li { display: grid; gap: 4px; padding: 10px 0; border-bottom: 1px solid #52685f; }.profile-accolades li b { color: #f1e5cf; font-size: 12px; }.profile-accolades li span { color: #c5b9a1; font: 9px var(--mono); }
+.player-history-panel .profile-seasons { margin-top: 8px; }
+.profile-stats-scroll { max-height: calc(100svh - 250px); overflow: auto; border: 1px solid #52685f; scrollbar-color: #c7a45d #203a30; }
+.profile-stats-mobile { display: none; }
+.profile-stats-table { width: max-content; min-width: 100%; border-collapse: separate; border-spacing: 0; font: 10px var(--mono); white-space: nowrap; }
+.profile-stats-table th, .profile-stats-table td { min-width: 68px; padding: 10px 9px; border-bottom: 1px solid #52685f; text-align: right; }
+.profile-stats-table thead th { position: sticky; top: 0; z-index: 2; color: #f1d998; background: #21372e; font-size: 8px; }
+.profile-stats-table tbody th { color: #f3d688; }.profile-stats-table tbody th small { display: block; color: #c5b9a1; font-size: 8px; }
+.profile-stats-table tbody td { color: #f0e4cf; }.profile-stats-table tbody tr:nth-child(even) { background: #29443a; }
+.profile-stats-table tbody tr:hover { background: #355449; }
+.profile-stats-table thead th:first-child, .profile-stats-table tbody th:first-child { position: sticky; left: 0; width: 64px; min-width: 64px; text-align: left; background: #203a30; }
+.profile-stats-table thead th:first-child { z-index: 4; background: #21372e; }.profile-stats-table tbody tr:nth-child(even) th:first-child, .profile-stats-table tbody tr:nth-child(even) .profile-team-name { background: #29443a; }
+.profile-stats-table tbody tr:hover th:first-child, .profile-stats-table tbody tr:hover .profile-team-name { background: #355449; }
+.profile-stats-table thead th:nth-child(2), .profile-stats-table .profile-team-name { position: sticky; left: 64px; width: 142px; min-width: 142px; max-width: 142px; text-align: left; white-space: normal; overflow-wrap: anywhere; background: #203a30; }
+.profile-stats-table thead th:nth-child(2) { z-index: 3; background: #21372e; }.profile-stats-table .profile-team-name { font: 700 11px var(--condensed); text-transform: uppercase; }
+.profile-accolades .accolade-summary { display: grid; grid-template-columns: auto 1fr; align-items: baseline; gap: 4px 10px; padding: 15px; margin-bottom: 14px; background: rgba(16,35,28,.6); }.accolade-summary strong { color: #efd28f; font: 800 31px var(--condensed); }.accolade-summary span { color: #c5b9a1; font: 9px var(--mono); text-transform: uppercase; }.profile-accolades ol { margin: 0; padding: 0; list-style: none; }.profile-accolades li { display: grid; gap: 4px; padding: 10px 0; border-bottom: 1px solid #52685f; }.profile-accolades li b { color: #f1e5cf; font-size: 12px; }.profile-accolades li span { color: #c5b9a1; font: 9px var(--mono); }
 .award-history, .team-history { margin: 0; padding: 0; list-style: none; }
 .award-history li, .team-history li { display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; padding: 12px 0; border-bottom: 1px solid #52685f; }
 .award-history b, .team-history b { color: #f2dfb2; font-size: 12px; }.award-history span, .team-history span, .team-history em { color: #c5b9a1; font: 9px var(--mono); }.team-history em { grid-column: 1 / -1; }
@@ -1031,7 +1047,29 @@ body[data-theme="archive"] .connection { color: #c9a75d; }
   .record-book { grid-template-columns: 1fr 1fr; }
   .trophy-tier > div { grid-template-columns: 1fr; }
   .achievement { min-height: 130px; }
-  .player-history-panel { width: 100%; }
+  .player-history-panel { width: 100%; padding: 54px 18px 24px; border-left: 0; }
+  .player-history-panel h2 { font-size: 30px; line-height: 1; overflow-wrap: anywhere; }
+  .profile-stats-scroll { display: none; }
+  .profile-stats-mobile { display: block; }
+  .profile-season-entry { border-top: 1px solid #52685f; }
+  .profile-season-entry:last-child { border-bottom: 1px solid #52685f; }
+  .profile-season-entry summary { position: relative; display: block; padding: 15px 32px 16px 0; list-style: none; cursor: pointer; }
+  .profile-season-entry summary::-webkit-details-marker { display: none; }
+  .profile-season-entry summary::after { position: absolute; top: 14px; right: 0; content: "+"; color: #efd28f; font: 700 22px var(--condensed); }
+  .profile-season-entry[open] summary::after { content: "−"; }
+  .profile-season-entry summary:focus-visible { outline: 2px solid #efd28f; outline-offset: -2px; }
+  .profile-season-identity { display: flex; flex-wrap: wrap; align-items: baseline; gap: 3px 9px; }
+  .profile-season-identity strong { color: #efd28f; font: 700 18px var(--condensed); }
+  .profile-season-identity small { color: #c5b9a1; font: 9px var(--mono); }
+  .profile-season-identity > b { flex-basis: 100%; color: #f1e5cf; font: 700 14px var(--condensed); text-transform: uppercase; overflow-wrap: anywhere; }
+  .profile-season-highlights, .profile-season-entry dl { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 9px; }
+  .profile-season-highlights { margin-top: 12px; }
+  .profile-season-highlights span, .profile-season-entry dt { color: #c5b9a1; font: 9px var(--mono); overflow-wrap: anywhere; }
+  .profile-season-highlights b { display: block; margin-bottom: 2px; color: #efd28f; font: 700 14px var(--mono); }
+  .profile-season-entry dl { margin: 0 0 14px; padding-top: 12px; border-top: 1px dotted #52685f; }
+  .profile-season-entry dl div { padding-bottom: 8px; border-bottom: 1px solid #52685f; }
+  .profile-season-entry dd { margin: 4px 0 0; color: #f1e5cf; font: 700 12px var(--mono); }
+  .profile-season-entry p { color: #c5b9a1; font-size: 10px; }
   .history-list article { grid-template-columns: 58px 54px 1fr; padding-inline: 8px; }
   .history-list img { width: 50px; height: 50px; }
   .franchise-header { grid-template-columns: 44px 1fr; padding: 10px; }

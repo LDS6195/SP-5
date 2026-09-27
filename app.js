@@ -809,26 +809,29 @@ function renderLeaderboard(general = false) {
     ? window.ProxyFranchise.generalLeaderboard(franchiseSession, { scope: "season", stat: activeRecordStat })
     : window.ProxyFranchise.playerLeaderboard(franchiseSession, { scope: "season", stat: activeRecordStat });
   const valueLabel = recordStats[general ? "generals" : "players"][activeRecordStat];
-  const columns = general ? ["starts", "wins", "averageRating", "teamEliminations", "survivalRate", "zonesCaptured"] : ["appearances", "wins", "averageRating", "eliminations", "assists", "zoneCaptures", "zoneDefenses", "interceptions", "distanceCarried", "networkCoverage"];
+  const columns = general ? ["starts", "wins", "averageRating", "teamEliminations", "survivalRate", "zonesCaptured"] : ["appearances", "wins", "averageRating", "eliminations", "assists", "zoneCaptures", "zoneDefenses", "interceptions", "distanceCarried", "decoysSuccessful", "decoysDenied", "networkCoverage"];
   return `<div class="records-table-wrap"><table class="records-table sortable-records"><thead><tr><th>#</th><th>${general ? "General" : "Player"}</th>${columns.map((stat) => `<th><button data-record-stat="${stat}">${statLabel(stat)}${activeRecordStat === stat ? " ↓" : ""}</button></th>`).join("")}</tr></thead><tbody>${records.map((record, index) => `<tr><td>${index + 1}</td><td><button class="player-history-link" data-player-record="${record.id}"><strong>${record.name}</strong><small>${displayRole(record.primaryRole)}</small></button></td>${columns.map((stat) => `<td>${formatRecordValue(stat, record[stat] ?? 0)}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
 }
 
 function renderRecordBook(scope) {
   const limit = scope === "career" ? 10 : 5;
-  const stats = ["eliminations", "assists", "zoneCaptures", "zoneDefenses", "interceptions", "distanceCarried", "playerOfMatch"];
+  const stats = ["eliminations", "assists", "zoneCaptures", "zoneDefenses", "interceptions", "distanceCarried", "decoysSuccessful", "decoysDenied", "networkCoverage", "playerOfMatch"];
   const cards = stats.flatMap((stat) => {
-    const records = window.ProxyFranchise.playerLeaderboard(franchiseSession, { scope, stat }).slice(0, limit);
-    return `<article class="ranked-record-card"><span>${scope === "career" ? "Career Leaders // Top 10" : `Season ${franchiseSession.season} // Top 5`}</span><h3>${statLabel(stat)}</h3><ol>${records.map((record, index) => `<li><b>${index + 1}</b><span>${record.name}</span><strong>${formatRecordValue(stat, record[stat])}</strong></li>`).join("") || `<li><span>No records yet</span></li>`}</ol></article>`;
+    const records = scope === "career"
+      ? window.ProxyFranchise.playerLeaderboard(franchiseSession, { scope, stat }).filter((record) => stat !== "networkCoverage" || record.coverageAppearances >= 5).slice(0, limit)
+      : Object.values(franchiseSession.playerRecords).flatMap((record) => Object.values(record.seasons).filter((season) => season.totals?.appearances && (stat !== "networkCoverage" || season.totals.coverageAppearances >= 5)).map((season) => ({ id: record.id, name: record.name, season: season.season, teams: Object.values(season.teams || {}).map((team) => team.teamName).join(" / "), coverageAppearances: season.totals.coverageAppearances || 0, [stat]: stat === "networkCoverage" ? Number((season.totals.coverageTotal / season.totals.coverageAppearances).toFixed(1)) : season.totals[stat] || 0 })))
+        .sort((first, second) => second[stat] - first[stat] || second.season - first.season).slice(0, limit);
+    return `<article class="ranked-record-card"><span>${scope === "career" ? "Career Leaders // Top 10" : "All Seasons // Top 5"}</span><h3>${stat === "networkCoverage" ? "Average Network Coverage" : statLabel(stat)}</h3><ol>${records.map((record, index) => `<li><b>${index + 1}</b><span><button class="player-history-link" data-player-record="${record.id}">${record.name}</button>${scope === "season" ? `<small>Season ${record.season} (Year ${2999 + record.season})${record.teams ? ` // ${record.teams}` : ""}${stat === "networkCoverage" ? ` // ${record.coverageAppearances} GP` : ""}</small>` : stat === "networkCoverage" ? `<small>${record.coverageAppearances} GP</small>` : ""}</span><strong>${formatRecordValue(stat, record[stat])}</strong></li>`).join("") || `<li><span>No records yet</span></li>`}</ol></article>`;
   });
   return `<div class="record-book">${cards.join("")}</div>`;
 }
 
 function renderGameRecords() {
   window.ProxyFranchise.ensureGameRecords(franchiseSession);
-  const statDefs = [["eliminations", "Most Eliminations"], ["assists", "Most Assists"], ["zoneCaptures", "Most Captures"], ["zoneDefenses", "Most Defenses"], ["interceptions", "Most Interceptions"], ["distanceCarried", "Longest Carry"], ["decoysSuccessful", "Most Successful Decoys"]];
+  const statDefs = [["eliminations", "Most Eliminations"], ["assists", "Most Assists"], ["zoneCaptures", "Most Captures"], ["zoneDefenses", "Most Defenses"], ["interceptions", "Most Interceptions"], ["distanceCarried", "Longest Carry"], ["decoysSuccessful", "Most Successful Decoys"], ["decoysDenied", "Most Denied Decoys"], ["networkCoverage", "Highest Network Coverage"]];
   const cards = statDefs.map(([stat, title]) => {
     const records = franchiseSession.gameRecords[stat] || [];
-    return `<article class="ranked-record-card"><span>Single-Game // Top 5</span><h3>${title}</h3><ol>${records.map((record, index) => `<li><b>${index + 1}</b><span>${record.name}<small>${record.teamName ? `${record.teamName} // ` : ""}Season ${record.season}, ${record.round || `Week ${record.week}`}</small></span><strong>${record.value}</strong></li>`).join("") || `<li><span>No games recorded</span></li>`}</ol></article>`;
+    return `<article class="ranked-record-card"><span>Single-Game // Top 5</span><h3>${title}</h3><ol>${records.map((record, index) => `<li><b>${index + 1}</b><span>${record.name}<small>${record.teamName ? `${record.teamName} // ` : ""}Season ${record.season}, ${record.round || `Week ${record.week}`}</small></span><strong>${formatRecordValue(stat, record.value)}</strong></li>`).join("") || `<li><span>No games recorded</span></li>`}</ol></article>`;
   });
   return `<div class="record-book">${cards.join("")}</div>`;
 }
@@ -855,13 +858,34 @@ function renderPlayerProfile(record) {
   const seasons = Object.values(record.seasons).sort((first, second) => second.season - first.season);
   const panel = document.querySelector("#playerHistoryPanel");
   const content = document.querySelector("#playerHistoryContent");
-  const seasonStats = (season) => {
-    const totals = season.totals;
-    const average = totals.appearances ? (totals.ratingTotal / totals.appearances).toFixed(1) : "0.0";
-    return `<article class="player-season-card"><header><strong>Season ${season.season}</strong><span>${Object.values(season.teams).map((team) => `${team.teamName} // ${team.appearances} GP`).join(" · ")}</span></header><div class="player-season-stats"><span><b>${average}</b> RTG</span><span><b>${totals.appearances}</b> APP</span><span><b>${totals.wins}-${totals.losses}</b> W-L</span><span><b>${totals.eliminations}</b> ELIM</span><span><b>${totals.assists}</b> AST</span><span><b>${totals.zoneCaptures}</b> CAP</span><span><b>${totals.zoneDefenses}</b> DEF</span><span><b>${totals.interceptions}</b> INT</span><span><b>${totals.distanceCarried}</b> DIST</span><span><b>${totals.decoysSuccessful}</b> DECOYS</span><span><b>${totals.coverageTotal}</b> COVERAGE</span></div></article>`;
+  const general = record.primaryRole === "General";
+  const columns = general ? ["GP", "RTG", "W-L", "TEAM ELIM", "SURVIVAL", "ZONES", "ZONE WINS", "ELIM WINS"] : ["GP", "RTG", "W-L", "ELIM", "AST", "CAP", "DEF", "INT", "DIST", "DECOYS", "DENIED", "COVERAGE", "SURVIVAL"];
+  const statValues = (totals, generalTotals) => general
+    ? [generalTotals?.starts || 0, generalTotals?.starts ? (generalTotals.ratingTotal / generalTotals.starts).toFixed(1) : "—", `${generalTotals?.wins || 0}-${generalTotals?.losses || 0}`, generalTotals?.teamEliminations || 0, generalTotals?.starts ? `${(generalTotals.survivalTotal / generalTotals.starts).toFixed(1)}%` : "0%", generalTotals?.zonesCaptured || 0, generalTotals?.zoneWins || 0, generalTotals?.eliminationWins || 0]
+    : [totals.appearances, totals.appearances ? (totals.ratingTotal / totals.appearances).toFixed(1) : "—", `${totals.wins}-${totals.losses}`, totals.eliminations, totals.assists, totals.zoneCaptures, totals.zoneDefenses, totals.interceptions, formatRecordValue("distanceCarried", totals.distanceCarried), totals.decoysSuccessful, totals.decoysDenied, totals.coverageAppearances ? `${(totals.coverageTotal / totals.coverageAppearances).toFixed(1)}%` : "0%", totals.appearances ? `${(totals.survived / totals.appearances * 100).toFixed(1)}%` : "0%"];
+  const seasonEntry = (season, team, totals, generalTotals) => {
+    const values = totals ? statValues(totals, generalTotals) : columns.map((column) => column === "GP" ? team.appearances : column === "W-L" ? `${team.wins}-${team.losses}` : "—");
+    return { year: 2999 + season.season, season: season.season, teamName: team?.teamName || "Combined season", unavailable: !totals, values };
   };
+  const entries = seasons.flatMap((season) => {
+    const teams = Object.values(season.teams || {});
+    const rows = teams.map((team) => {
+      const totals = team.totals?.appearances === team.appearances ? team.totals : teams.length === 1 ? season.totals : null;
+      const generalTotals = teams.length === 1 && !team.general?.starts ? season.general : team.general;
+      return seasonEntry(season, team, totals, generalTotals);
+    });
+    const needsCombined = teams.length !== 1 && teams.some((team) => team.totals?.appearances !== team.appearances);
+    if (needsCombined) rows.push(seasonEntry(season, null, season.totals, season.general));
+    return rows;
+  });
+  const featuredStats = general ? ["TEAM ELIM", "SURVIVAL", "ZONES"] : ({ Bruiser: ["ELIM", "DEF"], Cannon: ["ELIM", "AST"], Runner: ["CAP", "DIST"], Visual: ["DECOYS", "DENIED", "COVERAGE"], Musical: ["DECOYS", "DENIED", "COVERAGE"] })[record.primaryRole] || ["ELIM", "AST"];
   const overview = `<section class="profile-overview"><div class="profile-career-total"><strong>${career.appearances}</strong><span>Career appearances</span><b>${career.wins}-${career.losses}</b><span>Career record</span></div><div class="profile-career-copy"><p>${displayRole(record.primaryRole)} // ${seasons.length} seasons in the archive</p><p>${career.eliminations} eliminations // ${career.zoneCaptures} captures // ${career.assists} assists</p></div></section>`;
-  const seasonsView = `<section class="profile-seasons">${seasons.map(seasonStats).join("") || `<p>No season stats recorded yet.</p>`}</section>`;
+  const desktopStats = `<div class="profile-stats-scroll" role="region" aria-label="Season statistics" tabindex="0"><table class="profile-stats-table"><thead><tr><th scope="col">Year</th><th scope="col">Team</th>${columns.map((column) => `<th scope="col">${column}</th>`).join("")}</tr></thead><tbody>${entries.map((entry) => `<tr><th scope="row">${entry.year}<small>S${entry.season}</small></th><td class="profile-team-name" ${entry.unavailable ? `title="Team stats unavailable for this saved season"` : ""}>${entry.teamName}</td>${entry.values.map((value) => `<td>${value}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
+  const mobileStats = `<div class="profile-stats-mobile">${entries.map((entry) => {
+    const highlights = entry.unavailable ? ["GP", "W-L"] : ["GP", "RTG", ...featuredStats];
+    return `<details class="profile-season-entry"><summary><span class="profile-season-identity"><strong>${entry.year}</strong><small>S${entry.season}</small><b>${entry.teamName}</b></span><span class="profile-season-highlights">${highlights.map((column) => `<span><b>${entry.values[columns.indexOf(column)]}</b>${column}</span>`).join("")}</span></summary><dl>${columns.map((column, index) => `<div><dt>${column}</dt><dd>${entry.values[index]}</dd></div>`).join("")}</dl>${entry.unavailable ? `<p>Team stats unavailable for this saved season.</p>` : ""}</details>`;
+  }).join("")}</div>`;
+  const seasonsView = `<section class="profile-seasons">${seasons.length ? desktopStats + mobileStats : `<p>No season stats recorded yet.</p>`}</section>`;
   const accolades = record.awards.slice().sort((first, second) => second.season - first.season).map((award) => `<li><b>${award.title}</b><span>Season ${award.season}${award.role ? ` // ${displayRole(award.role)}` : ""}${award.value ? ` // ${award.value}` : ""}</span></li>`).join("");
   const accoladesView = `<section class="profile-accolades"><div class="accolade-summary"><strong>${record.awards.length}</strong><span>Career accolades</span><strong>${career.championships}</strong><span>Championships</span></div><ol>${accolades || `<li><span>No accolades recorded yet.</span></li>`}</ol></section>`;
   const views = { overview, seasons: seasonsView, accolades: accoladesView };
@@ -873,7 +897,7 @@ function openPlayerHistory(playerId) {
   const record = franchiseSession?.playerRecords[playerId];
   if (!record) return;
   activePlayerProfileId = playerId;
-  activePlayerProfileView = "overview";
+  activePlayerProfileView = "seasons";
   renderPlayerProfile(record);
 }
 
@@ -891,7 +915,7 @@ function renderRecords() {
   document.querySelector("#recordsGamesPlayed").textContent = `Set 3000-09-01`;
   const titles = { players: "Player Statistics", generals: "General Statistics", season: "Season Record Holders", games: "Game Records", career: "Career Leaders", history: "League History", trophies: "Trophy Room" };
   document.querySelector("#recordsViewTitle").textContent = titles[activeRecordView];
-  document.querySelector("#recordsEyebrow").textContent = activeRecordView === "career" || activeRecordView === "history" ? "All Seasons" : `Season ${franchiseSession.season}`;
+  document.querySelector("#recordsEyebrow").textContent = ["season", "career", "history"].includes(activeRecordView) ? "All Seasons" : `Season ${franchiseSession.season}`;
   select.hidden = true;
   if (!select.hidden) {
     const options = recordStats[activeRecordView];

@@ -334,8 +334,16 @@
     if (!record.awards) record.awards = [];
     if (!record.seasons[state.season]) record.seasons[state.season] = { season: state.season, totals: emptyPlayerTotals(), general: emptyGeneralTotals(), teams: {} };
     const season = record.seasons[state.season];
+    if (!season.teams[team.id] && Object.keys(season.teams).length === 1) {
+      const previousTeam = Object.values(season.teams)[0];
+      if (!previousTeam.totals) previousTeam.totals = { ...season.totals };
+      if (!previousTeam.general) previousTeam.general = { ...season.general };
+    }
     if (!season.teams[team.id]) season.teams[team.id] = { teamId: team.id, teamName: team.name, appearances: 0, wins: 0, losses: 0 };
-    return { record, season, teamHistory: season.teams[team.id] };
+    const teamHistory = season.teams[team.id];
+    if (!teamHistory.totals) teamHistory.totals = Object.keys(season.teams).length === 1 && teamHistory.appearances ? { ...season.totals } : emptyPlayerTotals();
+    if (!teamHistory.general) teamHistory.general = Object.keys(season.teams).length === 1 && teamHistory.appearances ? { ...season.general } : emptyGeneralTotals();
+    return { record, season, teamHistory };
   }
 
   function addPlayerTotals(target, line, won, playoff) {
@@ -369,29 +377,32 @@
         const { record, season, teamHistory } = getPlayerRecord(state, team, line);
         addPlayerTotals(record.career, line, won, playoff);
         addPlayerTotals(season.totals, line, won, playoff);
+        addPlayerTotals(teamHistory.totals, line, won, playoff);
         teamHistory.appearances += 1;
         teamHistory[won ? "wins" : "losses"] += 1;
         if (line.role === "General") {
           addGeneralTotals(record.generalCareer, line, result, side, won, playoff);
           addGeneralTotals(season.general, line, result, side, won, playoff);
+          addGeneralTotals(teamHistory.general, line, result, side, won, playoff);
         }
       });
       const eligible = (result.players?.[side] || []).slice().sort((a, b) => b.rating - a.rating)[0];
       if (eligible) {
-        const { record, season } = getPlayerRecord(state, team, eligible);
+        const { record, season, teamHistory } = getPlayerRecord(state, team, eligible);
         record.career.playerOfMatch += won ? 1 : 0;
         season.totals.playerOfMatch += won ? 1 : 0;
+        teamHistory.totals.playerOfMatch += won ? 1 : 0;
       }
     });
   }
 
-  const GAME_RECORD_STATS = ["eliminations", "assists", "zoneCaptures", "zoneDefenses", "interceptions", "distanceCarried", "decoysSuccessful"];
+  const GAME_RECORD_STATS = ["eliminations", "assists", "zoneCaptures", "zoneDefenses", "interceptions", "distanceCarried", "decoysSuccessful", "decoysDenied", "networkCoverage"];
 
-  function trackGameRecords(state, game, result) {
+  function trackGameRecords(state, game, result, stats = GAME_RECORD_STATS) {
     ensureGameRecords(state);
     ["home", "away"].forEach((side) => {
       const team = state.teams[game[`${side}TeamId`]];
-      (result.players?.[side] || []).forEach((line) => GAME_RECORD_STATS.forEach((stat) => {
+      (result.players?.[side] || []).forEach((line) => stats.forEach((stat) => {
         const value = line[stat] || 0;
         const list = (state.gameRecords[stat] ||= []);
         if (!value || (list.length >= 5 && value <= list[4].value)) return;
@@ -403,9 +414,10 @@
   }
 
   function ensureGameRecords(state) {
-    if (state.gameRecords) return state.gameRecords;
-    state.gameRecords = {};
-    [...state.schedule.flatMap((week) => week.games), ...(state.playoffs?.games || [])].filter((game) => game.result).forEach((game) => trackGameRecords(state, game, game.result));
+    state.gameRecords ||= {};
+    const missing = GAME_RECORD_STATS.filter((stat) => !Object.hasOwn(state.gameRecords, stat));
+    missing.forEach((stat) => { state.gameRecords[stat] = []; });
+    if (missing.length) [...state.schedule.flatMap((week) => week.games), ...(state.playoffs?.games || [])].filter((game) => game.result).forEach((game) => trackGameRecords(state, game, game.result, missing));
     return state.gameRecords;
   }
 
