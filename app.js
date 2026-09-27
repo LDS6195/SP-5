@@ -507,26 +507,41 @@ function renderAwards() {
   if (!awardTypes.some((award) => award.type === selectedAwardType)) selectedAwardType = awardTypes[0]?.type;
   const selected = awards.filter((award) => award.type === selectedAwardType);
   const teamForPlayer = (playerId) => franchiseSession.teams.find((team) => team.roster.some((player) => player.id === playerId));
-  const awardMetrics = (award, totals, average) => {
-    const metricMap = {
-      "season-distanceCarried": [["Distance", totals?.distanceCarried || award.value || 0]],
-      "season-eliminations": [["Eliminations", totals?.eliminations || award.value || 0]],
-      "season-assists": [["Assists", totals?.assists || award.value || 0]],
-      "season-zoneCaptures": [["Captures", totals?.zoneCaptures || award.value || 0]],
-      "season-zoneDefenses": [["Zone Defense", totals?.zoneDefenses || award.value || 0]],
-      "season-interceptions": [["Interceptions", totals?.interceptions || award.value || 0]]
-    };
-    return metricMap[award.type] || [["Rating", average], ["Wins", totals?.wins || 0], ["Appearances", totals?.appearances || 0]];
+  const roleMetrics = {
+    Bruiser: [["Eliminations", "eliminations"], ["Zone Defenses", "zoneDefenses"]],
+    Cannon: [["Eliminations", "eliminations"], ["Assists", "assists"]],
+    Runner: [["Captures", "zoneCaptures"], ["Distance", "distanceCarried"]],
+    Visual: [["Decoys Successful", "decoysSuccessful"], ["Coverage", "networkCoverage"]],
+    Musical: [["Decoys Denied", "decoysDenied"], ["Coverage", "networkCoverage"]]
+  };
+  const awardStats = {
+    "season-distanceCarried": ["Distance", "distanceCarried"],
+    "season-eliminations": ["Eliminations", "eliminations"],
+    "season-assists": ["Assists", "assists"],
+    "season-zoneCaptures": ["Captures", "zoneCaptures"],
+    "season-zoneDefenses": ["Zone Defenses", "zoneDefenses"],
+    "season-interceptions": ["Interceptions", "interceptions"]
+  };
+  const awardMetrics = (award, record) => {
+    if (award.type === "general-of-year") {
+      const general = record?.seasons[franchiseSession.season]?.general;
+      const starts = general?.starts || 0;
+      return [["Rating", starts ? (general.ratingTotal / starts).toFixed(1) : "—"], ["Team Elims", general?.teamEliminations || 0], ["Survival Rate", starts ? `${(general.survivalTotal / starts).toFixed(1)}%` : "0%"], ["Zones Captured", general?.zonesCaptured || 0]];
+    }
+    const totals = record?.seasons[franchiseSession.season]?.totals;
+    const average = totals?.appearances ? (totals.ratingTotal / totals.appearances).toFixed(1) : "—";
+    const stats = [...(roleMetrics[award.role || record?.primaryRole] || [])];
+    const awardStat = awardStats[award.type];
+    if (awardStat && !stats.some(([, key]) => key === awardStat[1])) stats.push(awardStat);
+    return [["Rating", average], ["Wins", totals?.wins || 0], ...stats.map(([label, key]) => [label, key === "networkCoverage" ? (totals?.coverageAppearances ? `${(totals.coverageTotal / totals.coverageAppearances).toFixed(1)}%` : "0%") : totals?.[key] ?? (awardStat?.[1] === key ? award.value : 0) ?? 0])];
   };
   const awardTitles = { "all-league-first": "1st Team All-EWSL", "all-league-second": "2nd Team All-EWSL" };
   const awardTitle = (award) => awardTitles[award.type] || award.title;
   const playerCard = (award) => {
     const team = teamForPlayer(award.playerId);
     const record = franchiseSession.playerRecords[award.playerId];
-    const totals = record?.seasons[franchiseSession.season]?.totals;
     const teamStanding = team ? franchiseSession.standings[team.id] : null;
-    const average = totals?.appearances ? (totals.ratingTotal / totals.appearances).toFixed(1) : "—";
-    return `<article class="award-dossier"><img src="${playerImage(team?.roster.find((player) => player.id === award.playerId))}" alt=""><div><span>${awardTitle(award)}${award.role ? ` // ${displayRole(award.role)}` : ""}</span><h2>${award.playerName}</h2><strong>${team?.name || "League"}</strong><p>${teamStanding ? `Team record ${teamStanding.wins}-${teamStanding.losses}` : "Season honor"}</p><dl>${awardMetrics(award, totals, average).map(([label, value]) => `<div><dt>${label}</dt><dd>${value}</dd></div>`).join("")}</dl></div></article>`;
+    return `<article class="award-dossier"><img src="${playerImage(team?.roster.find((player) => player.id === award.playerId))}" alt=""><div><span>${awardTitle(award)}${award.role ? ` // ${displayRole(award.role)}` : ""}</span><h2>${award.playerName}</h2><strong>${team?.name || "League"}</strong><p>${teamStanding ? `Team record ${teamStanding.wins}-${teamStanding.losses}` : "Season honor"}</p><dl>${awardMetrics(award, record).map(([label, value]) => `<div><dt>${label}</dt><dd>${value}</dd></div>`).join("")}</dl></div></article>`;
   };
   const cards = `<div class="award-dossiers">${selected.map(playerCard).join("") || `<div class="records-empty"><strong>Award details unavailable.</strong></div>`}</div>`;
   document.querySelector("#awardsBoard").innerHTML = `<nav class="award-tabs">${awardTypes.map((award) => `<button class="award-tab ${award.type === selectedAwardType ? "active" : ""}" data-award-type="${award.type}">${awardTitle(award)}</button>`).join("")}</nav>${cards}`;
