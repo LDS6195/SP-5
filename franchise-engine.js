@@ -709,10 +709,12 @@
     return game.result.winner === "home" ? game.homeTeamId : game.awayTeamId;
   }
 
-  function finalizePlayoffs(state, championTeamId, runnerUpTeamId) {
+  function selectPlayoffsMvp(state, championTeamId, runnerUpTeamId) {
     const playoffPerformances = new Map();
+    const teamGames = new Map();
     state.playoffs.games.forEach((game) => ["home", "away"].forEach((side) => {
       const teamId = game[`${side}TeamId`];
+      teamGames.set(teamId, (teamGames.get(teamId) || 0) + 1);
       (game.result.players?.[side] || []).filter((line) => line.role !== "General").forEach((line) => {
         const current = playoffPerformances.get(line.id) || { id: line.id, name: line.name, teamId, ratingTotal: 0, games: 0 };
         current.ratingTotal += line.rating;
@@ -720,11 +722,39 @@
         playoffPerformances.set(line.id, current);
       });
     }));
-    const rankedPlayers = [...playoffPerformances.values()].map((entry) => ({ ...entry, average: entry.ratingTotal / entry.games })).sort((first, second) => second.average - first.average);
+    const rankedPlayers = [...playoffPerformances.values()]
+      .filter((entry) => entry.games >= Math.max(2, Math.ceil((teamGames.get(entry.teamId) || 0) * .75)))
+      .map((entry) => ({ ...entry, average: entry.ratingTotal / entry.games }))
+      .sort((first, second) => second.average - first.average);
     const bestChampion = rankedPlayers.find((player) => player.teamId === championTeamId);
     const bestFinalLoser = rankedPlayers.find((player) => player.teamId === runnerUpTeamId);
     const mvp = bestFinalLoser && bestChampion && bestFinalLoser.average >= bestChampion.average * 1.1 ? bestFinalLoser : bestChampion || rankedPlayers[0];
-    const playoffsMvp = mvp ? { season: state.season, type: "playoffs-mvp", title: "Playoffs MVP", playerId: mvp.id, playerName: mvp.name, teamId: mvp.teamId } : null;
+    return mvp ? { season: state.season, type: "playoffs-mvp", title: "Playoffs MVP", playerId: mvp.id, playerName: mvp.name, teamId: mvp.teamId } : null;
+  }
+
+  function repairPlayoffsMvp(state) {
+    if (!state.playoffs?.complete || !state.playoffs.games?.length) return false;
+    const previous = state.playoffs.awards?.find((award) => award.type === "playoffs-mvp");
+    const replacement = selectPlayoffsMvp(state, state.playoffs.championTeamId, state.playoffs.runnerUpTeamId);
+    if (!previous || !replacement || previous.playerId === replacement.playerId) return false;
+    const appearances = state.playoffs.games.filter((game) => (game.result.players?.home || []).some((line) => line.id === previous.playerId) || (game.result.players?.away || []).some((line) => line.id === previous.playerId)).length;
+    const teamGames = state.playoffs.games.filter((game) => game.homeTeamId === previous.teamId || game.awayTeamId === previous.teamId).length;
+    if (appearances >= Math.max(2, Math.ceil(teamGames * .75))) return false;
+    const oldAccolades = state.playerRecords[previous.playerId]?.awards;
+    const oldAwardIndex = oldAccolades?.findIndex((award) => award.type === "playoffs-mvp" && award.season === state.season) ?? -1;
+    if (oldAwardIndex >= 0) oldAccolades.splice(oldAwardIndex, 1);
+    state.achievements.unlocked = state.achievements.unlocked.filter((achievement) => !(achievement.id === "playoffs-mvp" && achievement.subjectId === previous.playerId && achievement.season === state.season));
+    grantAward(state, replacement);
+    state.playoffs.awards = state.playoffs.awards.map((award) => award.type === "playoffs-mvp" ? replacement : award);
+    [state.playoffs.archive, state.leagueHistory.find((season) => season.season === state.season)].filter(Boolean).forEach((archive) => {
+      archive.awards = archive.awards.map((award) => award.type === "playoffs-mvp" ? replacement : award);
+    });
+    evaluateAchievements(state);
+    return true;
+  }
+
+  function finalizePlayoffs(state, championTeamId, runnerUpTeamId) {
+    const playoffsMvp = selectPlayoffsMvp(state, championTeamId, runnerUpTeamId);
     if (playoffsMvp) grantAward(state, playoffsMvp);
     state.playoffs.awards = playoffsMvp ? [...state.playoffs.regularSeasonAwards, playoffsMvp] : state.playoffs.regularSeasonAwards;
     state.playoffs.championTeamId = championTeamId;
@@ -980,5 +1010,5 @@
     return { ...result, renewal };
   }
 
-  return { createLeague, generateSchedule, simulateGame, playWeek, playUntilWeek, userGameForWeek, standingsFor, playerLeaderboard, generalLeaderboard, recordHolders, calculateSeasonAwards, archiveSeason, evaluateAchievements, startPlayoffs, playPlayoffRound, playoffGameForUser, runPlayoffs, ensureGameRecords, startOffseason, recommendedProtections, validProtections, submitProtections, renewalCurrentPick, renewalAvailable, renewalUserPick, renewalCpuStep, renewalAutoPick, simulateRenewal, runRenewalDraft, beginNextSeason, advanceSeason, swapFreeAgent, ACHIEVEMENTS };
+  return { createLeague, generateSchedule, simulateGame, playWeek, playUntilWeek, userGameForWeek, standingsFor, playerLeaderboard, generalLeaderboard, recordHolders, calculateSeasonAwards, archiveSeason, evaluateAchievements, startPlayoffs, playPlayoffRound, playoffGameForUser, runPlayoffs, repairPlayoffsMvp, ensureGameRecords, startOffseason, recommendedProtections, validProtections, submitProtections, renewalCurrentPick, renewalAvailable, renewalUserPick, renewalCpuStep, renewalAutoPick, simulateRenewal, runRenewalDraft, beginNextSeason, advanceSeason, swapFreeAgent, ACHIEVEMENTS };
 });

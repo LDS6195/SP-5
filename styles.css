@@ -411,8 +411,10 @@ button:focus-visible, a:focus-visible { outline: 3px solid #fff; outline-offset:
 .standing-rank strong { color: #8f2f24; font: 800 48px/.8 var(--condensed); }.standing-rank span { color: #665947; font: 10px var(--mono); }
 .season-side-panel p { margin: 10px 0 0; color: #5e5140; font-size: 11px; line-height: 1.5; }
 .postseason-control h3 { margin: 9px 0 5px; font: italic 800 20px var(--condensed); text-transform: uppercase; }
+.postseason-control .menu-kicker { color: #69452f; }
 .postseason-control img { width: 92px; height: 92px; display: block; margin: 12px auto; object-fit: contain; }
 .postseason-control button { width: 100%; min-height: 45px; display: flex; justify-content: space-between; align-items: center; margin-top: 14px; padding: 0 13px; color: #f5e8d1; background: #8f2f24; font: 700 11px var(--sans); }
+.postseason-control button[data-postseason-action="playoffs"] { color: #f5e8d1; background: #203a30; }
 .season-leaders { margin: 10px 0 0; }
 .season-leaders div { display: grid; grid-template-columns: 1fr auto; padding: 9px 0; border-bottom: 1px dotted #a18d6f; }
 .season-leaders dt { color: #675947; font-size: 10px; }.season-leaders dd { margin: 0; font-size: 11px; }.season-leaders b { margin-left: 5px; color: #8f2f24; font-family: var(--mono); }
@@ -719,7 +721,7 @@ body[data-theme="broadcast"] .prospect-number { font-size: 110px; }
 @keyframes championship-enter { from { opacity: 0; transform: translateY(18px) scale(.96); } to { opacity: 1; transform: translateY(0) scale(1); } } @keyframes confetti-fall { from { transform: translateY(-90px) rotate(0); } to { transform: translateY(90px) rotate(12deg); } }
 .season-award-reel { display: grid; gap: 6px; margin: 12px 0; }
 .season-award-reel span { display: flex; justify-content: space-between; gap: 10px; padding: 7px 0; border-bottom: 1px dotted currentColor; font-size: 11px; }
-.season-award-reel b { color: #e4c574; font-family: var(--condensed); text-transform: uppercase; }
+.season-award-reel b { color: #69452f; font-family: var(--condensed); text-transform: uppercase; }
 .awards-screen { min-height: 100vh; color: #f0e4ce; background: #24150e; }
 .awards-header { min-height: 92px; display: grid; grid-template-columns: 52px 1fr auto; align-items: center; gap: 16px; padding: 12px 28px; background: #342117; border-bottom: 1px solid #76533b; }
 .awards-header h1 { margin: 5px 0 0; font: italic 800 42px/.9 var(--condensed); text-transform: uppercase; }

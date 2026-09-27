@@ -232,8 +232,10 @@ async function restoreGame(snapshot) {
   draftSession = window.ProxyDraft.restoreDraft(window.PROXY_PLAYER_POOL, snapshot.draft);
   userDraftTeam = draftSession.state.teams[selectedFranchiseIndex];
   franchiseSession = snapshot.league || null;
+  let repairedPlayoffsMvp = false;
   if (franchiseSession) {
     franchiseSession.transactions ||= [];
+    repairedPlayoffsMvp = window.ProxyFranchise.repairPlayoffsMvp(franchiseSession);
     userDraftTeam = franchiseSession.teams[franchiseSession.userTeamId];
   }
   selectedSeasonGame = snapshot.ui?.selectedSeasonGame ?? 0;
@@ -253,6 +255,7 @@ async function restoreGame(snapshot) {
   updateDraftUI();
   const destination = snapshot.stage === "draft" ? gameInterface : snapshot.stage === "playoffs" ? playoffsScreen : snapshot.stage === "offseason" ? offseasonScreen : seasonScreen;
   showGameScreen(destination);
+  if (repairedPlayoffsMvp) persistFranchiseState();
 }
 
 async function refreshContinueButton() {
@@ -382,7 +385,7 @@ function renderPostseasonControl() {
     return;
   }
   const champion = franchiseSession.teams[franchiseSession.playoffs.championTeamId];
-  container.innerHTML = `<span class="menu-kicker">Season ${franchiseSession.season} Champion</span><img src="${teamLogo(champion.name)}" alt=""><h3>${champion.name}</h3><div class="season-award-reel"><span><b>Record</b>${franchiseSession.standings[champion.id].wins}-${franchiseSession.standings[champion.id].losses}</span><span><b>Playoffs MVP</b>${franchiseSession.playoffs.awards.find((award) => award.type === "playoffs-mvp")?.playerName || "—"}</span></div><button data-postseason-action="advance">Begin Offseason <span>→</span></button>`;
+  container.innerHTML = `<span class="menu-kicker">Season ${franchiseSession.season} Champion</span><img src="${teamLogo(champion.name)}" alt=""><h3>${champion.name}</h3><div class="season-award-reel"><span><b>Record</b>${franchiseSession.standings[champion.id].wins}-${franchiseSession.standings[champion.id].losses}</span><span><b>Playoffs MVP</b>${franchiseSession.playoffs.awards.find((award) => award.type === "playoffs-mvp")?.playerName || "—"}</span></div><button data-postseason-action="playoffs">Review Playoffs <span>→</span></button><button data-postseason-action="advance">Begin Offseason <span>→</span></button>`;
 }
 
 function playoffCard(game) {
