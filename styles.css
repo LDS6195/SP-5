@@ -803,8 +803,10 @@ body[data-theme="broadcast"] .prospect-number { font-size: 110px; }
 .speed-console i { width: 7px; height: 7px; border-radius: 50%; background: #53655d; box-shadow: inset 0 1px 2px rgba(0,0,0,.6); }
 .speed-console .active { color: #fff0ce; background: transparent; }
 .speed-console .active i { background: #e2bd65; box-shadow: 0 0 9px rgba(226,189,101,.7); }
-.resolve-control { min-width: 118px; height: 52px; display: grid; grid-template-columns: 25px 1fr; grid-template-rows: 1fr 1fr; align-items: end; padding: 7px 14px 8px 10px; color: #2b1c12; background: linear-gradient(105deg, #b38d49, #dfbd71); clip-path: polygon(0 0, calc(100% - 13px) 0, 100% 50%, calc(100% - 13px) 100%, 0 100%, 7px 50%); text-align: left; }
-.resolve-control b { grid-row: 1 / 3; align-self: center; font-size: 24px; }.resolve-control span { font: 700 11px var(--sans); text-transform: uppercase; }.resolve-control small { align-self: start; font: 8px var(--mono); }
+.resolve-control { min-width: 132px; height: 52px; display: grid; grid-template-columns: 22px 1fr; align-items: center; gap: 4px; padding: 0 20px 0 12px; color: #2b1c12; background: linear-gradient(105deg, #b38d49, #dfbd71); clip-path: polygon(0 0, calc(100% - 13px) 0, 100% 50%, calc(100% - 13px) 100%, 0 100%, 7px 50%); text-align: left; }
+.resolve-control b { font-size: 24px; line-height: 1; }.resolve-control span { font: 800 13px var(--sans); text-transform: uppercase; white-space: nowrap; }
+.match-topbar .resolve-control, .match-topbar .resolve-control b, .match-topbar .resolve-control span { color: #1a0f08; }
+.match-topbar .resolve-control span { display: inline; font: 800 13px var(--sans); letter-spacing: .04em; }
 .reset-control { width: 42px; height: 42px; padding: 0; color: #cdbb9d; background: transparent; border: 1px dashed #84674e; border-radius: 50%; font-size: 21px; }
 .score-ribbon { min-height: 108px; display: grid; grid-template-columns: 1fr minmax(220px, .65fr) 1fr; align-items: stretch; color: #2a2017; background: #e8dcc5; border-bottom: 1px solid #9d8768; }
 .score-team { display: grid; grid-template-columns: 58px auto auto; align-content: center; align-items: center; gap: 0 14px; padding: 13px clamp(20px, 5vw, 70px); }
@@ -1287,3 +1289,98 @@ body[data-theme="broadcast"] .portrait-wrap img { object-fit: cover; object-posi
 .candidate-rail { --stat-count: 8; overflow: auto; }
 .candidate-table-head, .candidate-row { grid-template-columns: minmax(190px, 2fr) 82px 64px repeat(var(--stat-count), 74px); }
 .candidate-row { width: max-content; min-width: 100%; }
+.renewal-detail { display: none; }
+
+/* Phone layout for franchise select and the inaugural draft. Desktop is unaffected. */
+@media (max-width: 760px) {
+  .team-count-label { display: none; }
+  .franchise-layout { display: block; min-height: 0; padding-bottom: 92px; }
+  .franchise-grid { grid-template-columns: repeat(3, 1fr); }
+  .franchise-choice { min-height: 0; grid-template-rows: 78px auto auto auto; padding: 0 8px 10px; }
+  .franchise-choice img { height: 74px; padding: 8px; }
+  .franchise-choice strong { font-size: 14px; }
+  .franchise-choice small { font-size: 8px; }
+  .franchise-dossier { position: fixed; z-index: 20; inset: auto 0 0; height: auto; display: grid; grid-template-columns: 52px 1fr auto; align-items: center; gap: 2px 12px; padding: 10px 12px calc(10px + env(safe-area-inset-bottom)); border: 0; border-top: 3px solid #c7a45d; box-shadow: 0 -10px 24px rgba(0,0,0,.4); }
+  .franchise-dossier .selected-logo-stage { grid-row: 1 / 3; width: 52px; height: 52px; margin: 0; }
+  .franchise-dossier .menu-kicker { grid-column: 2; grid-row: 1; font-size: 9px; }
+  .franchise-dossier h2 { grid-column: 2; grid-row: 2; margin: 0; font-size: 20px; line-height: 1; }
+  .franchise-dossier dl { display: none; }
+  .confirm-franchise { grid-column: 3; grid-row: 1 / 3; width: auto; min-height: 48px; margin: 0; gap: 10px; padding: 0 14px; font-size: 13px; }
+
+  body[data-theme] .app-shell .topbar { height: 56px; grid-template-columns: 1fr; }
+  body[data-theme] .app-shell .season-status { display: none; }
+  .app-shell .main-nav .nav-current { flex: 1; min-width: 0; height: 48px; padding: 0; font-size: 12px; border-bottom: 0; border-top: 2px solid transparent; }
+  .app-shell .main-nav .nav-current.active { border-top-color: var(--brass); }
+  body[data-theme] .app-shell .brief-strip { min-height: 0; grid-template-columns: 1fr auto; gap: 8px 12px; padding: 10px 12px; }
+  .app-shell .brief-strip > div:first-child { display: none; }
+  .app-shell .brief-strip .pick-status { display: block; grid-column: 1; grid-row: 1; padding-left: 0; border: 0; }
+  .app-shell .brief-strip .pick-status strong { margin-top: 2px; font-size: 14px; }
+  .app-shell .brief-strip .draft-clock { grid-column: 2; grid-row: 1; padding-left: 12px; text-align: right; }
+  .app-shell .brief-strip .draft-clock strong { font-size: 20px; }
+  .app-shell .brief-strip .auto-draft-button { grid-column: 1 / -1; grid-row: 2; min-height: 38px; }
+
+  body[data-theme] .app-shell .workspace { display: flex; flex-direction: column; gap: 10px; padding: 10px 8px; }
+  body[data-theme] .app-shell .workspace > .prospect-stage { display: block; order: 1; }
+  body[data-theme] .app-shell .workspace > .roster-panel { display: flex; order: 2; }
+  body[data-theme] .app-shell .workspace > .intel-panel { display: none; }
+  .app-shell .stage-header { height: 46px; padding: 0 12px; }
+  .app-shell .stage-header h2 { font-size: 15px; }
+
+  body[data-theme] .app-shell .prospect-card { min-height: 0; grid-template-columns: 104px minmax(0, 1fr); }
+  body[data-theme] .app-shell .portrait-wrap { height: auto; min-height: 150px; aspect-ratio: auto; margin: 0; border: 0; outline: 0; transform: none; }
+  .app-shell .portrait-wrap .era-tag { display: none; }
+  body[data-theme] .app-shell .prospect-info { padding: 12px 12px 12px 14px; }
+  .app-shell .prospect-info::before { left: 14px; }
+  body[data-theme] .app-shell .prospect-info h3 { margin: 6px 0 4px; font-size: 26px; line-height: .9; }
+  .app-shell .prospect-summary, .app-shell .traits, .app-shell .fit-callout { display: none; }
+  body[data-theme] .app-shell .attribute-grid { gap: 7px 12px; padding: 8px 0; margin: 8px 0 10px; }
+  .app-shell .attribute-grid span { font-size: 9px; }
+  .app-shell .draft-actions { grid-template-columns: 44px 1fr; }
+  .app-shell .watch-button { font-size: 0; }
+  .app-shell .watch-button span { font-size: 16px; }
+  .app-shell .draft-button { min-height: 44px; padding: 0 12px; font-size: 12px; }
+
+  .app-shell .draft-pool-toolbar { grid-template-columns: 1fr; margin: 10px 10px 8px; }
+  .app-shell .draft-pool-toolbar > span { display: none; }
+  .app-shell .candidate-rail { max-height: 58svh; margin: 0 10px; }
+  .app-shell .candidate-table-head, .app-shell .candidate-row { width: 100%; min-width: 0; grid-template-columns: minmax(0, 1fr) 84px 40px; gap: 8px; }
+  .app-shell .candidate-table-head > span:nth-child(n+4), .app-shell .candidate-row > span:nth-child(n+4) { display: none; }
+  .app-shell .candidate-row { min-height: 50px; }
+  .app-shell .candidate-row > span:nth-child(2) { font-size: 9px; text-align: left; }
+  .app-shell .draft-board { margin: 10px 10px 0; }
+  .app-shell .draft-board header { flex-wrap: wrap; }
+  .app-shell .draft-board-list > div { grid-template-columns: 28px 1fr; gap: 2px 8px; padding: 6px 12px; }
+  .app-shell .draft-board-list > div b { grid-column: 2; }
+  .app-shell .draft-board-list > div small { grid-column: 2; }
+
+  .app-shell .roster-list { grid-template-columns: 1fr 1fr; column-gap: 8px; padding: 6px 10px; }
+  .app-shell .roster-slot { min-height: 46px; grid-template-columns: 30px 1fr auto; gap: 6px; }
+  .app-shell .roster-avatar { width: 30px; height: 30px; }
+  .app-shell .chemistry-summary { margin: 8px 10px 10px; padding: 12px; }
+
+  .season-workspace .season-subnav { flex: 0 0 auto; display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; min-height: 0; padding: 0; background: #52695f; }
+  .season-workspace .season-view-button { min-width: 0; min-height: 46px; padding: 6px 4px; color: #efe3cc; background: #1f342b; font-size: 11px; line-height: 1.15; letter-spacing: .02em; text-align: center; white-space: normal; clip-path: none; }
+  .season-workspace .season-view-button.active { color: #25180f; background: #c7a45d; clip-path: none; }
+
+  .match-topbar .match-controls { grid-template-columns: auto minmax(0, 1fr); gap: 8px; }
+  .match-topbar .speed-console { min-width: 0; }
+  .match-topbar .resolve-control { grid-column: 1 / -1; width: 100%; min-width: 0; height: 46px; justify-content: center; grid-template-columns: auto auto; clip-path: none; }
+
+  .awards-layout .awards-command, .progression-layout .progression-command { order: -1; min-height: 0; }
+
+  .renewal-row small { display: none; }
+  .renewal-row, .renewal-head { min-width: 0; grid-template-columns: minmax(0, 1fr) 76px 38px 38px; gap: 6px; padding: 0 10px; }
+  .renewal-head > span { display: none; }
+  .renewal-row > span:nth-child(2) { font-size: 9px; text-align: left; }
+  .renewal-detail { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 10px 12px; padding: 12px; color: #f2e6d0; background: #203a30; border-bottom: 3px solid #c7a45d; }
+  .renewal-detail img { width: 64px; height: 80px; object-fit: cover; filter: grayscale(.6) sepia(.2); }
+  .renewal-detail span { display: block; color: #efd28f; font: 9px var(--mono); text-transform: uppercase; }
+  .renewal-detail strong { display: block; margin: 3px 0; font: 700 19px var(--condensed); text-transform: uppercase; }
+  .renewal-detail small { display: block; color: #cbbda4; font: 9px var(--mono); }
+  .renewal-detail dl { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 12px; margin: 8px 0 0; }
+  .renewal-detail dl div { display: flex; justify-content: space-between; border-bottom: 1px dotted #52695f; }
+  .renewal-detail dt { color: #cbbda4; font: 9px var(--mono); text-transform: uppercase; }
+  .renewal-detail dd { margin: 0; font: 700 11px var(--mono); }
+  .renewal-detail button { grid-column: 1 / -1; min-height: 46px; display: flex; justify-content: space-between; align-items: center; padding: 0 14px; color: #25180f; background: #c7a45d; font-weight: 800; text-transform: uppercase; }
+  .renewal-detail button:disabled { opacity: .45; }
+}

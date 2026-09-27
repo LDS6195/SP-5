@@ -12,8 +12,8 @@
     { id: "playoffs-mvp", tier: "trophy", title: "Playoffs MVP", description: "Roster the most valuable field player of the playoffs." },
     { id: "conference-champion", tier: "banner", title: "Conference Champion", description: "Win a conference championship." },
     { id: "best-record", tier: "banner", title: "League Standard", description: "Finish with the league's best regular-season record." },
-    { id: "all-league-first", tier: "banner", title: "First-Team Standard", description: "Roster a First-Team All-League player." },
-    { id: "all-league-second", tier: "banner", title: "Second-Team Standard", description: "Roster a Second-Team All-League player." },
+    { id: "all-league-first", tier: "banner", title: "First-Team Standard", description: "Roster a 1st Team All-EWSL player." },
+    { id: "all-league-second", tier: "banner", title: "Second-Team Standard", description: "Roster a 2nd Team All-EWSL player." },
     { id: "season-elimination-leader", tier: "banner", title: "Elimination Crown", description: "Roster the season elimination leader." },
     { id: "season-capture-leader", tier: "banner", title: "Territory Crown", description: "Roster the season zone-capture leader." },
     { id: "first-win", tier: "badge", title: "First Signal", description: "Win the first game of a franchise." },
@@ -103,8 +103,8 @@
     ["career-positive", "banner", "Winning Tradition", "Finish a player career with a winning record."],
     ["career-champion", "trophy", "Champion Personnel", "Roster a player with three championships."],
     ["record-book", "banner", "Into the Archive", "Set a season record in any tracked category."],
-    ["all-league-pair", "banner", "First and Second", "Roster First-Team and Second-Team All-League players."],
-    ["all-league-nine", "trophy", "Complete First Team", "Roster all nine First-Team All-League positions."],
+    ["all-league-pair", "banner", "First and Second", "Roster 1st Team and 2nd Team All-EWSL players."],
+    ["all-league-nine", "trophy", "Complete First Team", "Roster all nine 1st Team All-EWSL positions."],
     ["stat-leader-pair", "banner", "Statistical Range", "Roster two different season statistical leaders."],
     ["trophy-room-ten", "plaque", "Ten Relics", "Unlock ten achievement types."],
     ["trophy-room-twenty-five", "trophy", "Quarter Century", "Unlock twenty-five achievement types."],
@@ -523,8 +523,8 @@
     const allLeagueCounts = { General: 1, Cannon: 2, Runner: 2, Bruiser: 2, Visual: 1, Musical: 1 };
     Object.entries(allLeagueCounts).forEach(([role, count]) => {
       const rolePlayers = playerLeaderboard(state, { scope: "season", stat: "averageRating" }).filter((record) => record.primaryRole === role);
-      rolePlayers.slice(0, count).forEach((record) => awards.push({ season: state.season, type: "all-league-first", title: "First Team All-League", role, playerId: record.id, playerName: record.name }));
-      rolePlayers.slice(count, count * 2).forEach((record) => awards.push({ season: state.season, type: "all-league-second", title: "Second Team All-League", role, playerId: record.id, playerName: record.name }));
+      rolePlayers.slice(0, count).forEach((record) => awards.push({ season: state.season, type: "all-league-first", title: "1st Team All-EWSL", role, playerId: record.id, playerName: record.name }));
+      rolePlayers.slice(count, count * 2).forEach((record) => awards.push({ season: state.season, type: "all-league-second", title: "2nd Team All-EWSL", role, playerId: record.id, playerName: record.name }));
     });
 
     const previousSeason = state.season - 1;

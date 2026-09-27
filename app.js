@@ -5,6 +5,7 @@ let userDraftTeam = draftSession.state.teams[draftSession.state.userTeamIndex];
 const starterSlots = ["General", "Bruiser", "Bruiser", "Runner", "Runner", "Cannon", "Cannon", "Visual", "Musical"];
 const strategySlotOrder = ["General", "Bruiser", "Bruiser", "Runner", "Runner", "Cannon", "Cannon", "Visual", "Musical"];
 const benchSlots = ["Cannon", "Runner", "Bruiser"];
+const USER_PICK_SECONDS = 180;
 const roleImages = {
   General: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=900&q=82",
   Cannon: "https://images.unsplash.com/photo-1568602471122-7832951cc4c5?auto=format&fit=crop&w=900&q=82",
@@ -71,7 +72,7 @@ const watchlistIds = new Set();
 let cpuDraftTimer = null;
 let draftBoardView = false;
 let draftClockPickIndex = -1;
-let selectedAwardType = "player-of-year";
+let selectedAwardType = null;
 let activePlayerProfileId = null;
 let activePlayerProfileView = "overview";
 let rulesEntry = "reference";
@@ -189,7 +190,7 @@ function showGameScreen(screen) {
   if (screen === franchiseScreen) renderFranchiseSelect();
   if (screen === recordsScreen) renderRecords();
   if (screen === playoffsScreen) renderPlayoffs();
-  if (screen === awardsScreen) renderAwards();
+  if (screen === awardsScreen) { selectedAwardType = null; renderAwards(); }
   if (screen === progressionScreen) renderProgression();
   if (screen === offseasonScreen) renderOffseason();
   if (screen === squadScreen) renderSquadRoom();
@@ -470,8 +471,7 @@ function renderAwards() {
   if (!franchiseSession) return;
   const postseason = Boolean(franchiseSession.playoffs?.complete);
   const awards = postseason ? (franchiseSession.playoffs.awards || []) : (franchiseSession.seasonAwards || window.ProxyFranchise.calculateSeasonAwards(franchiseSession));
-  if (!postseason) selectedAwardType = "general-of-year";
-  else if (!selectedAwardType || selectedAwardType === "general-of-year" || selectedAwardType === "player-of-year") selectedAwardType = "playoffs-mvp";
+  if (!postseason && !selectedAwardType) selectedAwardType = "general-of-year";
   if (!postseason) {
     franchiseSession.seasonAwards = awards;
     document.querySelector("#awardsTitle").textContent = "Regular Season Awards";
@@ -524,18 +524,18 @@ function renderAwards() {
     };
     return metricMap[award.type] || [["Rating", average], ["Wins", totals?.wins || 0], ["Appearances", totals?.appearances || 0]];
   };
+  const awardTitles = { "all-league-first": "1st Team All-EWSL", "all-league-second": "2nd Team All-EWSL" };
+  const awardTitle = (award) => awardTitles[award.type] || award.title;
   const playerCard = (award) => {
     const team = teamForPlayer(award.playerId);
     const record = franchiseSession.playerRecords[award.playerId];
     const totals = record?.seasons[franchiseSession.season]?.totals;
     const teamStanding = team ? franchiseSession.standings[team.id] : null;
     const average = totals?.appearances ? (totals.ratingTotal / totals.appearances).toFixed(1) : "—";
-    return `<article class="award-dossier"><img src="${playerImage(team?.roster.find((player) => player.id === award.playerId))}" alt=""><div><span>${award.title}</span><h2>${award.playerName}</h2><strong>${team?.name || "League"}</strong><p>${teamStanding ? `Team record ${teamStanding.wins}-${teamStanding.losses}` : "Season honor"}</p><dl>${awardMetrics(award, totals, average).map(([label, value]) => `<div><dt>${label}</dt><dd>${value}</dd></div>`).join("")}</dl></div></article>`;
+    return `<article class="award-dossier"><img src="${playerImage(team?.roster.find((player) => player.id === award.playerId))}" alt=""><div><span>${awardTitle(award)}${award.role ? ` // ${displayRole(award.role)}` : ""}</span><h2>${award.playerName}</h2><strong>${team?.name || "League"}</strong><p>${teamStanding ? `Team record ${teamStanding.wins}-${teamStanding.losses}` : "Season honor"}</p><dl>${awardMetrics(award, totals, average).map(([label, value]) => `<div><dt>${label}</dt><dd>${value}</dd></div>`).join("")}</dl></div></article>`;
   };
-  const firstTeamRoles = ["General", "Runner", "Runner", "Bruiser", "Bruiser", "Cannon", "Cannon", "Visual", "Musical"];
-  const firstTeamByRole = selected.reduce((out, award) => { (out[award.role] ||= []).push(award); return out; }, {});
-  const firstTeam = selectedAwardType === "all-league-first" ? `<div class="award-depth-chart">${firstTeamRoles.map((role, index) => { const award = (firstTeamByRole[role] || []).shift(); return `<article class="depth-slot ${role} slot-${index}"><span>${displayRole(role)}</span><strong>${award?.playerName || "Pending"}</strong><small>${award?.role ? displayRole(award.role) : displayRole(role)}</small></article>`; }).join("")}</div>` : `<div class="award-dossiers">${selected.map(playerCard).join("") || `<div class="records-empty"><strong>Award details unavailable.</strong></div>`}</div>`;
-  document.querySelector("#awardsBoard").innerHTML = `<nav class="award-tabs">${awardTypes.map((award) => `<button class="award-tab ${award.type === selectedAwardType ? "active" : ""}" data-award-type="${award.type}">${award.title}</button>`).join("")}${awards.some((award) => award.type === "all-league-first") ? `<button class="award-tab ${selectedAwardType === "all-league-first" ? "active" : ""}" data-award-type="all-league-first">First Team Depth Chart</button>` : ""}</nav>${firstTeam}`;
+  const cards = `<div class="award-dossiers">${selected.map(playerCard).join("") || `<div class="records-empty"><strong>Award details unavailable.</strong></div>`}</div>`;
+  document.querySelector("#awardsBoard").innerHTML = `<nav class="award-tabs">${awardTypes.map((award) => `<button class="award-tab ${award.type === selectedAwardType ? "active" : ""}" data-award-type="${award.type}">${awardTitle(award)}</button>`).join("")}</nav>${cards}`;
 }
 
 function renderProgression() {
@@ -604,7 +604,8 @@ function renderOffseason() {
     document.querySelector("#offseasonPoolCount").textContent = `${offseason.availableIds.length} available`;
     const roles = ["All", "General", "Cannon", "Runner", "Bruiser", "Visual", "Musical"];
     const sortHead = (key, label) => `<button data-renewal-sort="${key}" class="${renewalSort.key === key ? "active" : ""}">${label}${renewalSort.key === key ? (renewalSort.dir < 0 ? " ▾" : " ▴") : ""}</button>`;
-    grid.innerHTML = `<nav class="renewal-filters">${roles.map((role) => `<button data-renewal-filter="${role}" class="${renewalFilter === role ? "active" : ""}">${role === "All" ? "All" : displayRole(role)}${role !== "All" ? ` <b>${counts[role] || 0}/${targets[role]}</b>` : ""}</button>`).join("")}</nav><div class="renewal-table"><div class="renewal-row renewal-head">${sortHead("name", "Player")}${sortHead("role", "Position")}${sortHead("ovr", "OVR")}${sortHead("form", "Form")}<span>Role Ratings</span></div>${available.map((player) => `<button class="renewal-row ${player.id === renewalSelectedId ? "active" : ""} ${canTake(player) ? "" : "full"}" data-renewal-select="${player.id}"><span class="renewal-name"><img src="${playerImage(player)}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>${player.name}</strong></span><span>${displayRole(player.primaryRole)}</span><b>${rating(player)}</b><span>${player.form > 0 ? `+${player.form}` : player.form || 0}</span><small>${canTake(player) ? playerPositionSummary(player) : "Position filled"}</small></button>`).join("") || `<p class="renewal-empty">No available players at this position.</p>`}</div>`;
+    const renewalDetail = (player) => `<div class="renewal-detail"><img src="${playerImage(player)}" alt="" loading="lazy" referrerpolicy="no-referrer"><div><span>${displayRole(player.primaryRole)} // ${rating(player)} OVR // ${player.form > 0 ? `+${player.form}` : player.form || 0} form</span><strong>${player.name}</strong><small>${playerPositionSummary(player)}</small><dl>${(roleAttributeLabels[player.primaryRole] || []).map(([label, key]) => `<div><dt>${label}</dt><dd>${player.attributes[key]}</dd></div>`).join("")}</dl></div><button data-renewal-draft="${player.id}" ${userTurn && canTake(player) ? "" : "disabled"}>${userTurn ? `Draft ${player.name.split(" ")[0]}` : "Waiting for your pick"} <span>→</span></button></div>`;
+    grid.innerHTML = `<nav class="renewal-filters">${roles.map((role) => `<button data-renewal-filter="${role}" class="${renewalFilter === role ? "active" : ""}">${role === "All" ? "All" : displayRole(role)}${role !== "All" ? ` <b>${counts[role] || 0}/${targets[role]}</b>` : ""}</button>`).join("")}</nav><div class="renewal-table"><div class="renewal-row renewal-head">${sortHead("name", "Player")}${sortHead("role", "Position")}${sortHead("ovr", "OVR")}${sortHead("form", "Form")}<span>Role Ratings</span></div>${available.map((player) => `<button class="renewal-row ${player.id === renewalSelectedId ? "active" : ""} ${canTake(player) ? "" : "full"}" data-renewal-select="${player.id}"><span class="renewal-name"><img src="${playerImage(player)}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer"><strong>${player.name}</strong></span><span>${displayRole(player.primaryRole)}</span><b>${rating(player)}</b><span>${player.form > 0 ? `+${player.form}` : player.form || 0}</span><small>${canTake(player) ? playerPositionSummary(player) : "Position filled"}</small></button>${player.id === renewalSelectedId ? renewalDetail(player) : ""}`).join("") || `<p class="renewal-empty">No available players at this position.</p>`}</div>`;
     const recent = offseason.picks.slice().reverse().map((pick) => {
       const player = offseason.pool.find((candidate) => candidate.id === pick.playerId);
       return `<div class="${pick.teamId === userDraftTeam.id ? "mine" : ""}"><span>${pick.round}.${String(pick.overall).padStart(2, "0")}</span><strong>${franchiseSession.teams[pick.teamId].name}</strong><b>${player?.name || "—"}</b><small>${player ? displayRole(player.primaryRole) : ""}</small></div>`;
@@ -1344,6 +1345,14 @@ document.querySelector("#offseasonGrid").addEventListener("click", (event) => {
     renderOffseason();
     return;
   }
+  const draftNow = event.target.closest("[data-renewal-draft]");
+  if (draftNow) {
+    if (!window.ProxyFranchise.renewalUserPick(franchiseSession, draftNow.dataset.renewalDraft)) { showToast("That player cannot be drafted"); return; }
+    renewalSelectedId = null;
+    persistFranchiseState();
+    renderOffseason();
+    return;
+  }
   const row = event.target.closest("[data-renewal-select]");
   if (row && !row.classList.contains("full")) { renewalSelectedId = row.dataset.renewalSelect; renderOffseason(); }
 });
@@ -1565,7 +1574,7 @@ function updateDraftUI() {
     document.querySelector("#draftButton").disabled = pick.teamIndex !== userDraftTeam.id;
     if (pick.teamIndex === userDraftTeam.id && draftClockPickIndex !== draftSession.state.pickIndex) {
       draftClockPickIndex = draftSession.state.pickIndex;
-      remainingSeconds = 90;
+      remainingSeconds = USER_PICK_SECONDS;
     }
     document.querySelector("#draftClock").textContent = pick.teamIndex === userDraftTeam.id ? `${Math.floor(remainingSeconds / 60).toString().padStart(2, "0")}:${(remainingSeconds % 60).toString().padStart(2, "0")}` : "CPU";
     document.querySelector("#autoDraftButton").innerHTML = "Auto Draft <span>→</span>";
@@ -1600,7 +1609,9 @@ function showToast(message) {
 
 candidateRail.addEventListener("click", (event) => {
   const candidate = event.target.closest(".candidate");
-  if (candidate) selectProspect(candidate.dataset.prospectId);
+  if (!candidate) return;
+  selectProspect(candidate.dataset.prospectId);
+  if (window.matchMedia("(max-width: 760px)").matches) document.querySelector(".prospect-card").scrollIntoView({ behavior: "smooth", block: "start" });
 });
 document.querySelector("#draftBoard").addEventListener("click", (event) => {
   if (!event.target.closest("[data-draft-board-action='skip']")) return;
@@ -1668,7 +1679,7 @@ document.querySelector("#draftButton").addEventListener("click", () => {
     return;
   }
   showToast(`${prospect.name} drafted // ${userDraftTeam.roster.length} of 12`);
-  remainingSeconds = 90;
+  remainingSeconds = USER_PICK_SECONDS;
   selectedProspectId = null;
   updateDraftUI();
   startCpuDraft();
@@ -1685,7 +1696,7 @@ document.querySelector("#autoDraftButton").addEventListener("click", () => {
   void saveCurrentGame("autosave");
 });
 
-let remainingSeconds = 90;
+let remainingSeconds = USER_PICK_SECONDS;
 window.setInterval(() => {
   const userTurn = draftSession.currentPick()?.teamIndex === userDraftTeam.id;
   if (!userTurn) {
