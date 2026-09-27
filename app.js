@@ -624,17 +624,18 @@ function renderSeasonRecap() {
   document.querySelector('[data-recap-platform="sms"]').href = `sms:?body=${encodeURIComponent(caption)}`;
   document.querySelector("#seasonRecapCaption").value = caption;
   const imageButton = document.querySelector('[data-recap-action="download"]');
-  imageButton.textContent = typeof navigator !== "undefined" && isAppleMobile() ? canShareSeasonRecapImage() ? "Save Photo" : "Open Image" : "Download Image";
+  imageButton.textContent = "Download Image";
   document.querySelector("#seasonRecapFeedback").textContent = "";
   preparedSeasonRecapImage = null;
-  if (typeof navigator !== "undefined" && isAppleMobile() && canShareSeasonRecapImage() && window.htmlToImage) {
+  if (typeof navigator !== "undefined" && isAppleMobile() && navigator.share && window.htmlToImage) {
     imageButton.disabled = true;
     imageButton.textContent = "Preparing Photo...";
     seasonRecapImage().then((file) => {
       preparedSeasonRecapImage = file;
-      imageButton.textContent = navigator.canShare({ files: [file] }) ? "Save Photo" : "Open Image";
-    }).catch(() => {
-      imageButton.textContent = "Open Image";
+      imageButton.textContent = navigator.canShare?.({ files: [file] }) ? "Save Photo" : "Download Image";
+    }).catch((error) => {
+      imageButton.textContent = "Download Image";
+      document.querySelector("#seasonRecapFeedback").textContent = error.message;
     }).finally(() => { imageButton.disabled = false; });
   }
 }
@@ -669,7 +670,7 @@ async function seasonRecapImage() {
     for (let offset = 0; offset < sources.length; offset += 3) {
       const batch = await Promise.all(sources.slice(offset, offset + 3).map(async (source) => {
         if (source.startsWith("data:")) return [source, source];
-        const response = await fetch(source, { mode: "cors" });
+        const response = await fetch(source, { mode: "cors", referrerPolicy: "no-referrer", cache: "force-cache" });
         if (!response.ok || !response.headers.get("content-type")?.startsWith("image/")) throw new Error("Report image unavailable");
         const image = await response.blob();
         const dataUrl = await new Promise((resolve, reject) => {
@@ -1554,18 +1555,12 @@ document.querySelector("#seasonRecapScreen").addEventListener("click", async (ev
       return;
     }
     const nativeImageShare = action === "instagram" && canShareSeasonRecapImage();
-    const imagePreview = action === "download" && isAppleMobile() ? window.open("", "_blank") : null;
     if (action === "instagram" && !nativeImageShare) window.open("https://www.instagram.com/", "_blank", "noopener,noreferrer");
     feedback.textContent = "Preparing report image...";
-    const file = await seasonRecapImage();
+    const file = preparedSeasonRecapImage || await seasonRecapImage();
     if (nativeImageShare) {
       await navigator.share({ title: `${userDraftTeam.name} // Year ${2999 + franchiseSession.season}`, text: seasonRecapCaption(), files: [file] });
       feedback.textContent = "Report shared.";
-    } else if (imagePreview) {
-      const url = URL.createObjectURL(file);
-      imagePreview.location.href = url;
-      setTimeout(() => URL.revokeObjectURL(url), 300000);
-      feedback.textContent = "Press and hold the image to save it to Photos.";
     } else {
       downloadSeasonRecap(file);
       if (action === "instagram") {

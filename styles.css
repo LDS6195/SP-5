@@ -1479,8 +1479,8 @@ body[data-theme="broadcast"] .portrait-wrap img { object-fit: cover; object-posi
   .app-shell .candidate-row { min-height: 50px; }
   .app-shell .candidate-row > span:nth-child(2) { font-size: 9px; text-align: left; }
   .app-shell .draft-board { margin: 10px 10px 0; }
-  .app-shell .draft-board header { flex-wrap: wrap; }
-  .app-shell .draft-board header button[data-draft-board-action="skip"] { position: fixed; z-index: 30; right: max(14px, calc(14px + env(safe-area-inset-right))); bottom: max(16px, calc(16px + env(safe-area-inset-bottom))); min-height: 48px; padding: 0 16px; box-shadow: 0 6px 18px rgba(0,0,0,.45); }
+  .app-shell .draft-board header { flex-direction: column-reverse; align-items: stretch; gap: 8px; }
+  .app-shell .draft-board header button[data-draft-board-action="skip"] { width: 100%; min-height: 44px; }
   .app-shell .draft-board-list > div { grid-template-columns: 28px 1fr; gap: 2px 8px; padding: 6px 12px; }
   .app-shell .draft-board-list > div b { grid-column: 2; }
   .app-shell .draft-board-list > div small { grid-column: 2; }
