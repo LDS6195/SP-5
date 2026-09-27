@@ -11,13 +11,19 @@
     for (const character of `${name}:${salt}`) hash = Math.imul(hash ^ character.charCodeAt(0), 16777619);
     return ((hash >>> 0) / 4294967295 - .5) * range;
   }
+  const arenaTemplates = [
+    { boundary: [[.08,.22],[.2,.06],[.8,.06],[.92,.22],[.92,.78],[.8,.94],[.2,.94],[.08,.78]], zones: [[.25,.22],[.75,.22],[.5,.5],[.25,.78],[.75,.78]], terrain: [[.23,.48,.13,.055],[.77,.52,.13,.055],[.49,.18,.035,.15],[.51,.82,.035,.15]] },
+    { boundary: [[.08,.08],[.42,.08],[.42,.17],[.58,.17],[.58,.08],[.92,.08],[.92,.4],[.84,.4],[.84,.6],[.92,.6],[.92,.92],[.58,.92],[.58,.83],[.42,.83],[.42,.92],[.08,.92],[.08,.6],[.16,.6],[.16,.4],[.08,.4]], zones: [[.26,.26],[.74,.26],[.5,.5],[.26,.74],[.74,.74]], terrain: [[.29,.45,.12,.06],[.71,.55,.12,.06],[.5,.3,.12,.035],[.5,.7,.12,.035]] },
+    { boundary: [[.04,.07],[.96,.07],[.5,.97]], zones: [[.28,.23],[.72,.23],[.5,.46],[.43,.7],[.57,.7]], terrain: [[.33,.4,.11,.045],[.67,.4,.11,.045],[.43,.57,.035,.12],[.57,.57,.035,.12]] },
+    { boundary: [[.5,.03],[.98,.5],[.5,.97],[.02,.5]], zones: [[.35,.28],[.65,.28],[.5,.5],[.35,.72],[.65,.72]], terrain: [[.3,.5,.08,.09],[.7,.5,.08,.09],[.5,.28,.09,.045],[.5,.72,.09,.045]] },
+    { boundary: [[.2,.04],[.8,.04],[.92,.12],[.97,.3],[.97,.7],[.92,.88],[.8,.96],[.2,.96],[.08,.88],[.03,.7],[.03,.3],[.08,.12]], zones: [[.25,.23],[.75,.23],[.5,.5],[.25,.77],[.75,.77]], terrain: [[.26,.5,.11,.05],[.74,.5,.11,.05],[.5,.22,.035,.11],[.5,.78,.035,.11]] },
+    { boundary: [[.04,.07],[.34,.07],[.34,.26],[.66,.26],[.66,.07],[.96,.07],[.96,.93],[.66,.93],[.66,.74],[.34,.74],[.34,.93],[.04,.93]], zones: [[.22,.23],[.78,.23],[.5,.5],[.22,.77],[.78,.77]], terrain: [[.2,.48,.09,.08],[.8,.52,.09,.08],[.5,.35,.12,.035],[.5,.65,.12,.035]] }
+  ];
   function arenaLayout(name) {
-    const zones = [[.25, .22, .075], [.75, .22, .075], [.5, .5, .08], [.25, .78, .075], [.75, .78, .075]]
-      .map(([x, y, radius], index) => ({ x: x + arenaOffset(name, index * 3, .075), y: y + arenaOffset(name, index * 3 + 1, .075), radius: radius + arenaOffset(name, index * 3 + 2, .012) }));
-    const boundary = [[.06, .26], [.14, .09], [.34, .035], [.66, .035], [.86, .09], [.94, .26], [.97, .5], [.94, .74], [.86, .91], [.66, .965], [.34, .965], [.14, .91], [.06, .74], [.03, .5]]
-      .map(([x, y], index) => [Math.max(.02, Math.min(.98, x + arenaOffset(name, 20 + index * 2, .04))), Math.max(.02, Math.min(.98, y + arenaOffset(name, 21 + index * 2, .04)))]);
-    const terrain = [[.23, .48, .13, .055], [.77, .52, .13, .055], [.49, .18, .035, .15], [.51, .82, .035, .15]]
-      .map(([x, y, width, height], index) => [x + arenaOffset(name, 50 + index * 2, .1), y + arenaOffset(name, 51 + index * 2, .1), width, height]);
+    const template = arenaTemplates[Math.floor((arenaOffset(name, "shape", 1) + .5) * arenaTemplates.length) % arenaTemplates.length];
+    const zones = template.zones.map(([x, y], index) => ({ x: x + arenaOffset(name, index * 3, .018), y: y + arenaOffset(name, index * 3 + 1, .018), radius: (index === 2 ? .08 : index > 2 && template.boundary.length <= 4 ? .05 : .07) + arenaOffset(name, index * 3 + 2, .006) }));
+    const boundary = template.boundary.map(([x, y], index) => [x + arenaOffset(name, 20 + index * 2, .014), y + arenaOffset(name, 21 + index * 2, .014)]);
+    const terrain = template.terrain.map(([x, y, width, height], index) => [x + arenaOffset(name, 60 + index * 2, .035), y + arenaOffset(name, 61 + index * 2, .035), width, height]);
     return { zones, boundary, terrain };
   }
   let arenaName = "Civic Rotunda";
@@ -638,15 +644,18 @@
     });
   }
 
+  function traceArenaBoundary(width, height) {
+    context.beginPath();
+    arenaGeometry.boundary.forEach(([x, y], index) => index ? context.lineTo(x * width, y * height) : context.moveTo(x * width, y * height));
+    context.closePath();
+  }
+
   function drawField(width, height) {
     context.clearRect(0, 0, width, height);
     context.fillStyle = "#0c1713";
     context.fillRect(0, 0, width, height);
-    const boundary = arenaGeometry.boundary;
     context.save();
-    context.beginPath();
-    boundary.forEach(([x, y], index) => index ? context.lineTo(x * width, y * height) : context.moveTo(x * width, y * height));
-    context.closePath();
+    traceArenaBoundary(width, height);
     context.clip();
     const gradient = context.createLinearGradient(0, 0, width, height);
     gradient.addColorStop(0, "#173328");
@@ -673,9 +682,7 @@
       context.restore();
     });
     context.restore();
-    context.beginPath();
-    boundary.forEach(([x, y], index) => index ? context.lineTo(x * width, y * height) : context.moveTo(x * width, y * height));
-    context.closePath();
+    traceArenaBoundary(width, height);
     context.lineWidth = 3;
     context.strokeStyle = "rgba(229,205,149,.7)";
     context.stroke();
@@ -690,6 +697,9 @@
     const width = rect.width;
     const height = rect.height;
     drawField(width, height);
+    context.save();
+    traceArenaBoundary(width, height);
+    context.clip();
     state.zones.forEach((zone, index) => {
       const x = zone.x * width;
       const y = zone.y * height;
@@ -716,6 +726,7 @@
       if (agent.star) { context.lineWidth = 2; context.strokeStyle = "#fff0cf"; context.stroke(); }
       context.restore();
     });
+    context.restore();
   }
 
   function frame(timestamp) {
