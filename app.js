@@ -523,7 +523,7 @@ function renderAwards() {
     "season-interceptions": ["Interceptions", "interceptions"]
   };
   const awardMetrics = (award, record) => {
-    if (award.type === "general-of-year") {
+    if (award.type === "general-of-year" || ((award.type === "all-league-first" || award.type === "all-league-second") && (award.role || record?.primaryRole) === "General")) {
       const general = record?.seasons[franchiseSession.season]?.general;
       const starts = general?.starts || 0;
       return [["Rating", starts ? (general.ratingTotal / starts).toFixed(1) : "—"], ["Team Elims", general?.teamEliminations || 0], ["Survival Rate", starts ? `${(general.survivalTotal / starts).toFixed(1)}%` : "0%"], ["Zones Captured", general?.zonesCaptured || 0]];
@@ -533,7 +533,7 @@ function renderAwards() {
     const stats = [...(roleMetrics[award.role || record?.primaryRole] || [])];
     const awardStat = awardStats[award.type];
     if (awardStat && !stats.some(([, key]) => key === awardStat[1])) stats.push(awardStat);
-    return [["Rating", average], ["Wins", totals?.wins || 0], ...stats.map(([label, key]) => [label, key === "networkCoverage" ? (totals?.coverageAppearances ? `${(totals.coverageTotal / totals.coverageAppearances).toFixed(1)}%` : "0%") : totals?.[key] ?? (awardStat?.[1] === key ? award.value : 0) ?? 0])];
+    return [["Rating", average], ...stats.map(([label, key]) => [label, key === "networkCoverage" ? (totals?.coverageAppearances ? `${(totals.coverageTotal / totals.coverageAppearances).toFixed(1)}%` : "0%") : totals?.[key] ?? (awardStat?.[1] === key ? award.value : 0) ?? 0])];
   };
   const awardTitles = { "all-league-first": "1st Team All-EWSL", "all-league-second": "2nd Team All-EWSL" };
   const awardTitle = (award) => awardTitles[award.type] || award.title;
