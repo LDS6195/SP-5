@@ -293,6 +293,7 @@
     pendingSubIn = null;
     state.running = false;
     state.finished = false;
+    document.querySelector("#matchSkipButton").hidden = false;
     state.elapsed = 0;
     state.scoreAccumulator = 0;
     state.eventAccumulator = 0;
@@ -538,6 +539,7 @@
   function finishMatch(reason) {
     state.running = false;
     state.finished = true;
+    document.querySelector("#matchSkipButton").hidden = true;
     if (state.watchdog) window.clearTimeout(state.watchdog);
     state.watchdog = null;
     const homeWon = reason === "elimination"

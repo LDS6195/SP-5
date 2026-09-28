@@ -1651,10 +1651,10 @@
       "source": "Wikidata / Wikimedia Commons"
     },
     "Ben Wallace": {
-      "title": "Official%20portrait%20of%20Rt%20Hon%20Ben%20Wallace%20MP%20crop%202.jpg",
-      "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Official_portrait_of_Rt_Hon_Ben_Wallace_MP_crop_2.jpg?width=320",
-      "pageUrl": "http://commons.wikimedia.org/wiki/Special:FilePath/Official%20portrait%20of%20Rt%20Hon%20Ben%20Wallace%20MP%20crop%202.jpg",
-      "source": "Wikidata / Wikimedia Commons"
+      "title": "Ben Wallace 4104263221 (cropped).jpg",
+      "url": "https://commons.wikimedia.org/wiki/Special:FilePath/Ben_Wallace_4104263221_(cropped).jpg?width=320",
+      "pageUrl": "https://commons.wikimedia.org/wiki/File:Ben_Wallace_4104263221_(cropped).jpg",
+      "source": "Wikimedia Commons"
     },
     "Tim Duncan": {
       "title": "Tim%20Duncan.jpg",
