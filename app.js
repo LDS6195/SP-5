@@ -1586,6 +1586,25 @@ document.querySelector("#exportAllButton").addEventListener("click", async () =>
 document.querySelector("#seasonRecapScreen").addEventListener("click", (event) => {
   if (event.target.closest("[data-recap-action='continue']")) advanceOffseason();
 });
+function renderRoster() {
+  document.querySelector("#draftTeamName").textContent = userDraftTeam.name;
+  document.querySelector("#draftTeamLogo").src = teamLogo(userDraftTeam.name);
+  const remaining = userDraftTeam.roster.slice();
+  const takeRole = (role) => {
+    const index = remaining.findIndex((player) => player.primaryRole === role);
+    return index < 0 ? null : remaining.splice(index, 1)[0];
+  };
+  const slots = [...starterSlots.map((role) => ({ role, label: "Starter", player: takeRole(role) })), ...benchSlots.map((role) => ({ role, label: "Bench", player: takeRole(role) }))];
+  rosterList.innerHTML = slots.map(({ role, label, player }) => `<div class="roster-slot ${player ? "filled" : "open"}">${player ? `<img class="roster-avatar" src="${playerImage(player)}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer">` : `<span class="roster-avatar empty">+</span>`}<span><small>${label} // ${displayRole(role)}</small><strong>${player?.name || "Open Position"}</strong></span><span class="roster-rating">${player?.overall ?? "--"}</span></div>`).join("");
+  document.querySelector("#rosterCapacity").textContent = `${userDraftTeam.roster.length} / 12`;
+  const roleCoverage = new Set(userDraftTeam.roster.map((player) => player.primaryRole)).size;
+  const chemistry = Math.min(99, 42 + Math.round(userDraftTeam.roster.length / 12 * 34) + Math.round(roleCoverage / 6 * 24));
+  const dial = document.querySelector(".chemistry-dial");
+  dial.style.setProperty("--score", chemistry);
+  dial.querySelector("strong").textContent = chemistry;
+  document.querySelector(".chemistry-summary > div:last-child > strong").textContent = chemistry >= 82 ? "Connected Vanguard" : chemistry >= 65 ? "Forming Vanguard" : "Unformed Squad";
+  document.querySelector(".chemistry-summary > div:last-child > p").textContent = `${roleCoverage}/6 role families online // improves as the roster fills`;
+}
 function ratingForDraftView(player) {
   return player.roleRatings[player.primaryRole] ?? player.overall;
 }
